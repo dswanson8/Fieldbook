@@ -5,43 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Digital Field Book – Table First (QAQC GPS)</title>
   <style>
-    :root{--pad:8px;--radius:10px}
+    :root{--pad:8px;--radius:12px;--accent:#0A84FF;--text:#111314;--separator:#E5E5EA;--bg:#FFFFFF;--bg-soft:#F9F9FB;--shadow:0 8px 24px rgba(0,0,0,0.06)}
     *{box-sizing:border-box}
-    body{margin:0;background:#fff;color:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;font-size:14px}
+    body{margin:0;background:#fff;color:#111;font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Segoe UI, Roboto, Helvetica, Arial, sans-serif;font-size:14px}
     header{padding:var(--pad)}
-    .wrap{max-width:1200px;margin:0 auto;padding:0 8px}
-    .card{background:#fff;border:1.5px solid #000;border-radius:var(--radius);padding:var(--pad);margin:var(--pad) auto;box-shadow:0 1px 0 #000}
-    input,button{font-size:14px;border-radius:8px;border:1.5px solid #000;background:#fff;color:#111;padding:6px 8px}
-    button{cursor:pointer;font-weight:600}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 12px}
+    .card{background:var(--bg);padding:var(--pad);margin:var(--pad) auto;border-radius:var(--radius);box-shadow:var(--shadow)}
+    input,button{font-size:14px;border-radius:10px;border:1px solid var(--separator);background:var(--bg);color:var(--text);padding:8px 10px;transition:box-shadow .15s ease, background .15s ease}
+    button{cursor:pointer;font-weight:600;flex:1}
     button.primary{background:#ffd400}
-    button.ghost{background:#f3f3f3}
+    button.ghost{background:var(--bg);}
+    button:hover{background:#F2F2F7}
+    button:active{background:#E5E5EA}
+    input:focus,button:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
     .row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
     .row>div{flex:1 1 140px}
-    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
-    thead th{position:sticky;top:0;background:#fff;padding:6px}
-    th,td{border:1px solid #000;padding:6px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    td.ro{background:#f7f7f7;font-weight:600}
+    table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px;background:var(--bg);border:1px solid var(--separator);border-radius:12px;overflow:hidden}
+    thead th{position:sticky;top:0;background:var(--bg-soft);padding:8px;font-weight:600;border-bottom:1px solid var(--separator);box-shadow:0 1px 0 var(--separator);}
+    th,td{border-bottom:1px solid var(--separator);padding:8px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    td.ro{background:#FAFAFC;font-weight:600}
     td[contenteditable="true"]{background:#fff}
     .small{font-size:11px;opacity:.9}
-    .chip{border:1.5px solid #000;border-radius:999px;padding:2px 8px;background:#fff}
-    .chip.warn{background:#ffe6e6}
+    .chip{padding:2px 8px;background:#fff;font-weight:600}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-    .gps-green{color:#0a7a25;font-weight:600}
-    .gps-yellow{color:#cc8800;font-weight:600}
-    .gps-red{color:#b00020;font-weight:600}
-    /* Mobile single-column stacking */
+    .gps-green{color:#34C759;font-weight:600}
+    .gps-yellow{color:#FFCC00;font-weight:600}
+    .gps-red{color:#FF3B30;font-weight:600}
+
   @media (max-width: 600px){
-    .wrap{max-width:100%;}
+    .wrap{max-width:100%}
     .row{flex-direction:column; align-items:stretch}
     .row>div{flex:1 1 auto; width:100%}
     label{display:block; margin-bottom:4px; font-weight:600}
     input{width:100%}
-    .btnbar{display:grid !important; grid-template-columns:1fr; gap:6px}
+    .btnbar{display:flex; flex-direction:row; gap:4px; margin-top:4px}
     table{font-size:12px}
     th, td{padding:4px}
+    th:nth-child(1){width:50px}
+    th:nth-child(2){width:50px}
+    th:nth-child(3){width:60px}
+    th:nth-child(4){width:50px}
+    th:nth-child(5){width:70px}
+    th:nth-child(6){width:65px}
   }
   @media (min-width: 900px){
     body{font-size:16px}
+    input,button{font-size:16px}
+    table{font-size:14px}
+    .wrap{max-width:1280px}
+  }
     input,button{font-size:16px}
     table{font-size:14px}
   }
@@ -57,27 +69,25 @@
     <div class="row" style="margin-top:6px">
       <div><label>Station<br><input id="station" placeholder="266" /></label></div>
       <div><label>Elevation<br><input id="knownElev" type="number" step="0.001" placeholder="693.274" /></label></div>
-      <div class="btnbar" style="flex:0 0 auto;display:flex;gap:6px">
+      <div class="btnbar">
         <button id="addBs" class="ghost">Add BS</button>
         <button id="addFs" class="ghost">Add FS</button>
         <button id="newSetup" class="ghost">New Setup</button>
       </div>
     </div>
-    <div class="status small">
-      <div class="chip">HI avg: <span id="hiAvg">—</span></div>
-    </div>
   </header>
 
   <section class="card">
+    <div class="small" style="margin-bottom:6px">HI avg: <span id="hiAvg">—</span></div>
     <table id="tbl">
       <thead>
         <tr>
-          <th style="width:60px">ST</th>
-          <th style="width:60px">BS</th>
-          <th style="width:70px">HI</th>
-          <th style="width:60px">FS</th>
-          <th style="width:80px">ELEV</th>
-          <th style="width:70px">GPS</th>
+          <th>ST</th>
+          <th>BS</th>
+          <th>HI</th>
+          <th>FS</th>
+          <th>ELEV</th>
+          <th>GPS</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -95,10 +105,8 @@
   const $ = id => document.getElementById(id);
   const fmt = n => (n==null||isNaN(n) ? '' : Number(n).toFixed(3));
 
-  // set default date
   $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
 
-  // load cache
   if(localStorage.fieldBookData){
     try {
       const saved = JSON.parse(localStorage.fieldBookData);
@@ -137,6 +145,7 @@
       const tdBs = document.createElement('td');
       if(r.type==='BS'){
         tdBs.contentEditable = true; tdBs.textContent = fmt(r.bs);
+        tdBs.onfocus = () => {document.execCommand('selectAll',false,null)};
         tdBs.oninput = () => { r.bs = parseFloat(tdBs.textContent); r.hi = (!isNaN(r.bs) && !isNaN(r.knownElev)) ? (r.knownElev + r.bs) : null; tdHi.textContent = fmt(r.hi); refreshHeader(); saveCache(); };
       } else { tdBs.textContent = ''; }
       const tdHi = document.createElement('td');
@@ -144,21 +153,25 @@
       const tdFs = document.createElement('td');
       if(r.type==='FS'){
         tdFs.contentEditable = true; tdFs.textContent = fmt(r.fs);
-        tdFs.oninput = () => { r.fs = parseFloat(tdFs.textContent); const s = hiStats(); r.elev = (!isNaN(r.fs) && !isNaN(s.avg)) ? (s.avg - r.fs) : r.elev; tdElev.textContent = fmt(r.elev); saveCache(); drawTable(); };
+        tdFs.onfocus = () => {document.execCommand('selectAll',false,null)};
+        tdFs.oninput = () => { r.fs = parseFloat(tdFs.textContent); const s = hiStats(); r.elev = (!isNaN(r.fs) && !isNaN(s.avg)) ? (s.avg - r.fs) : r.elev; tdElev.textContent = fmt(r.elev); saveCache(); };
       } else { tdFs.textContent = ''; }
       const tdElev = document.createElement('td');
       tdElev.className = 'ro'; tdElev.textContent = fmt(r.elev);
       const tdGps = document.createElement('td');
       tdGps.contentEditable = true; tdGps.textContent = fmt(r.gps);
-      tdGps.oninput = () => { r.gps = parseFloat(tdGps.textContent); saveCache(); drawTable(); };
-      if(!isNaN(r.gps) && !isNaN(r.elev)){
-        const diff = Math.abs(r.gps - r.elev);
-        if(diff <= 0.030) tdGps.className = 'gps-green';
-        else if(diff <= 0.040) tdGps.className = 'gps-yellow';
-        else tdGps.className = 'gps-red';
-      } else {
+      tdGps.onfocus = () => {document.execCommand('selectAll',false,null)};
+      tdGps.oninput = () => { r.gps = parseFloat(tdGps.textContent); updateGps(); saveCache(); };
+      function updateGps(){
+        const diff = (!isNaN(r.gps) && !isNaN(r.elev)) ? Math.abs(r.gps - r.elev) : NaN;
         tdGps.className = '';
+        if(!isNaN(diff)){
+          if(diff <= 0.030) tdGps.classList.add('gps-green');
+          else if(diff <= 0.040) tdGps.classList.add('gps-yellow');
+          else tdGps.classList.add('gps-red');
+        }
       }
+      updateGps();
       tr.append(tdSt, tdBs, tdHi, tdFs, tdElev, tdGps);
       tb.appendChild(tr);
     });
