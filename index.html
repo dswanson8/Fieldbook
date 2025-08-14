@@ -3,59 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Digital Field Book – Table First (QAQC GPS)</title>
+  <title>Digital Field Book – Multi-Setup • Apple Style</title>
   <style>
     :root{--pad:8px;--radius:12px;--accent:#0A84FF;--text:#111314;--separator:#E5E5EA;--bg:#FFFFFF;--bg-soft:#F9F9FB;--shadow:0 8px 24px rgba(0,0,0,0.06)}
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Segoe UI, Roboto, Helvetica, Arial, sans-serif;font-size:14px}
     header{padding:var(--pad)}
-    .wrap{max-width:1200px;margin:0 auto;padding:0 12px}
+    .wrap{max-width:1280px;margin:0 auto;padding:0 12px}
     .card{background:var(--bg);padding:var(--pad);margin:var(--pad) auto;border-radius:var(--radius);box-shadow:var(--shadow)}
     input,button{font-size:14px;border-radius:10px;border:1px solid var(--separator);background:var(--bg);color:var(--text);padding:8px 10px;transition:box-shadow .15s ease, background .15s ease}
-    button{cursor:pointer;font-weight:600;flex:1}
-    button.primary{background:#ffd400}
-    button.ghost{background:var(--bg)}
+    button{cursor:pointer;font-weight:600}
     button:hover{background:#F2F2F7}
     button:active{background:#E5E5EA}
     input:focus,button:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
     .row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
     .row>div{flex:1 1 140px}
+    .btnbar{display:flex;gap:6px;margin-top:4px}
+    .btnbar button{flex:1 1 0}
+
+    /* Setup themes (borders + HI text) */
+    .setup-1{--setup:#0A84FF}
+    .setup-2{--setup:#34C759}
+    .setup-3{--setup:#FF9500}
+    .setup-4{--setup:#AF52DE}
+    .setup-5{--setup:#5AC8FA}
+    .setup{border:1px solid var(--separator); border-top:4px solid var(--setup);}
+    .setup .hi-color{color:var(--setup)}
+    .setup .toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px}
+
     table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px;background:var(--bg);border:1px solid var(--separator);border-radius:12px;overflow:hidden}
-    thead th{position:sticky;top:0;background:var(--bg-soft);padding:8px;font-weight:600;border-bottom:1px solid var(--separator);box-shadow:0 1px 0 var(--separator)}
+    thead th{position:sticky;top:0;background:var(--bg-soft);padding:8px;font-weight:600;border-bottom:1px solid var(--separator)}
     th,td{border-bottom:1px solid var(--separator);padding:8px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     td.ro{background:#FAFAFC;font-weight:600}
-    td[contenteditable="true"]{background:#F0F8FF; /* soft blue hue */}
+    td[contenteditable="true"]{background:#F0F8FF}
     td[contenteditable="true"]:focus{outline:2px solid var(--accent);background:#E6F0FF}
+
     .small{font-size:11px;opacity:.9}
-    .chip{padding:2px 8px;background:#fff;font-weight:600}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     .gps-green{color:#34C759;font-weight:600}
     .gps-yellow{color:#FFCC00;font-weight:600}
     .gps-red{color:#FF3B30;font-weight:600}
 
-  @media (max-width: 600px){
-    .wrap{max-width:100%}
-    .row{flex-direction:column; align-items:stretch}
-    .row>div{flex:1 1 auto; width:100%}
-    label{display:block; margin-bottom:4px; font-weight:600}
-    input{width:100%}
-    .btnbar{display:flex; flex-direction:row; gap:4px; margin-top:4px}
-    table{font-size:12px}
-    th, td{padding:4px}
-    th:nth-child(1){width:50px}
-    th:nth-child(2){width:50px}
-    th:nth-child(3){width:60px}
-    th:nth-child(4){width:50px}
-    th:nth-child(5){width:70px}
-    th:nth-child(6){width:65px}
-  }
-  @media (min-width: 900px){
-    body{font-size:16px}
-    input,button{font-size:16px}
-    table{font-size:14px}
-    .wrap{max-width:1280px}
-  }
-</style>
+    /* Mobile single-column form + tighter table */
+    @media (max-width: 600px){
+      .wrap{max-width:100%}
+      .row{flex-direction:column; align-items:stretch}
+      .row>div{flex:1 1 auto; width:100%}
+      label{display:block; margin-bottom:4px; font-weight:600}
+      input{width:100%}
+      table{font-size:12px}
+      th, td{padding:4px}
+      th:nth-child(1){width:52px}
+      th:nth-child(2){width:52px}
+      th:nth-child(3){width:64px}
+      th:nth-child(4){width:52px}
+      th:nth-child(5){width:72px}
+      th:nth-child(6){width:66px}
+    }
+
+    /* Desktop: a bit larger */
+    @media (min-width: 1000px){
+      body{font-size:17px}
+      input,button{font-size:17px}
+      table{font-size:15px}
+    }
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -68,147 +79,209 @@
       <div><label>Station<br><input id="station" placeholder="266" /></label></div>
       <div><label>Elevation<br><input id="knownElev" type="number" step="0.001" placeholder="693.274" /></label></div>
       <div class="btnbar">
-        <button id="addBs" class="ghost">Add BS</button>
-        <button id="addFs" class="ghost">Add FS</button>
-        <button id="newSetup" class="ghost">New Setup</button>
+        <button id="addBs">Add BS</button>
+        <button id="addFs">Add FS</button>
+        <button id="newSetup">New Setup</button>
       </div>
     </div>
   </header>
 
-  <section class="card">
-    <div class="small" style="margin-bottom:6px">HI avg: <span id="hiAvg">—</span></div>
-    <table id="tbl">
-      <thead>
-        <tr>
-          <th>ST</th>
-          <th>BS</th>
-          <th>HI</th>
-          <th>FS</th>
-          <th>ELEV</th>
-          <th>GPS</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div class="small">GPS QA: <span class="gps-green">≤ 0.030 m</span> • <span class="gps-yellow">≤ 0.040 m</span> • <span class="gps-red">&gt; 0.040 m</span></div>
-  </section>
+  <div id="setups"></div>
+
 </div>
 
 <script>
 (() => {
-  let setupId = 1;
-  let rows = [];
+  const STORAGE_KEY = 'fieldbook_mset_v1';
+  const GPS_OK = 0.030, GPS_YEL = 0.040;
 
   const $ = id => document.getElementById(id);
   const fmt = n => (n==null||isNaN(n) ? '' : Number(n).toFixed(3));
 
-  $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
+  // --- Model: multiple setups
+  let setups = []; // [{id, theme, locked, rows:[{station,type,knownElev,bs,hi,fs,elev,gps}]}]
+  let cur = 0;     // index of current setup
+  const themes = ['setup-1','setup-2','setup-3','setup-4','setup-5'];
 
-  if(localStorage.fieldBookData){
-    try {
-      const saved = JSON.parse(localStorage.fieldBookData);
-      rows = saved.rows || [];
-      setupId = saved.setupId || 1;
-      $("jobTitle").value = saved.jobTitle || '';
-      $("dateOfSurvey").value = saved.dateOfSurvey || $("dateOfSurvey").value;
-    }catch(e){console.warn("cache load failed",e)}
-  }
-
-  function hiStats(){
-    const bsRows = rows.filter(r=>r.setupId===setupId && r.type==='BS' && !isNaN(r.hi));
+  function hiStats(setup){
+    const bsRows = setup.rows.filter(r=>r.type==='BS' && !isNaN(r.hi));
     if(bsRows.length===0) return {avg:null};
     const his = bsRows.map(r=>r.hi);
-    const avg = his.reduce((a,b)=>a+b,0)/his.length;
-    return {avg};
+    return {avg: his.reduce((a,b)=>a+b,0)/his.length};
   }
 
-  function refreshHeader(){
-    const s = hiStats();
-    $("hiAvg").textContent = fmt(s.avg);
+  function newSetup(carryElev=null){
+    const idx = setups.length;
+    const theme = themes[idx % themes.length];
+    setups.push({ id: idx+1, theme, locked:false, rows:[], carryElev });
+    cur = idx;
+    render();
+    if(carryElev!=null){ $("knownElev").value = fmt(carryElev); }
+    save();
   }
 
-  function saveCache(){
-    const data = {rows, setupId, jobTitle:$("jobTitle").value, dateOfSurvey:$("dateOfSurvey").value};
-    localStorage.fieldBookData = JSON.stringify(data);
+  function save(){
+    const data = {setups, cur, jobTitle:$("jobTitle").value, dateOfSurvey:$("dateOfSurvey").value};
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+  function load(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    try{
+      const d = JSON.parse(raw);
+      if(!d || !Array.isArray(d.setups)) return false;
+      setups = d.setups; cur = d.cur || 0;
+      $("jobTitle").value = d.jobTitle || '';
+      if(d.dateOfSurvey) $("dateOfSurvey").value = d.dateOfSurvey;
+      return true;
+    }catch(e){ console.warn('load fail', e); return false; }
   }
 
-  function drawTable(){
-    const tb = document.querySelector('#tbl tbody');
-    tb.innerHTML='';
-    rows.forEach((r) => {
-      const tr = document.createElement('tr');
-      const tdSt = document.createElement('td');
-      tdSt.textContent = r.station || '';
+  function gpsClass(diff){
+    if(isNaN(diff)) return '';
+    if(Math.abs(diff) <= GPS_OK) return 'gps-green';
+    if(Math.abs(diff) <= GPS_YEL) return 'gps-yellow';
+    return 'gps-red';
+  }
 
-      const tdBs = document.createElement('td');
-      if(r.type==='BS'){
-        tdBs.contentEditable = true; tdBs.textContent = fmt(r.bs);
-        tdBs.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
-        tdBs.oninput = () => { r.bs = parseFloat(tdBs.textContent); r.hi = (!isNaN(r.bs) && !isNaN(r.knownElev)) ? (r.knownElev + r.bs) : null; tdHi.textContent = fmt(r.hi); refreshHeader(); saveCache(); };
-      } else { tdBs.textContent = ''; }
+  function render(){
+    const container = $("setups");
+    container.innerHTML = '';
 
-      const tdHi = document.createElement('td');
-      tdHi.className = 'ro'; tdHi.textContent = fmt(r.hi);
+    setups.forEach((setup, si) => {
+      const s = hiStats(setup);
+      const sec = document.createElement('section');
+      sec.className = `card setup ${setup.theme}` + (setup.locked? ' locked':'');
 
-      const tdFs = document.createElement('td');
-      if(r.type==='FS'){
-        tdFs.contentEditable = true; tdFs.textContent = fmt(r.fs);
-        tdFs.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
-        tdFs.oninput = () => { r.fs = parseFloat(tdFs.textContent); const s = hiStats(); r.elev = (!isNaN(r.fs) && !isNaN(s.avg)) ? (s.avg - r.fs) : r.elev; tdElev.textContent = fmt(r.elev); saveCache(); };
-      } else { tdFs.textContent = ''; }
+      // Toolbar per setup
+      const bar = document.createElement('div');
+      bar.className = 'toolbar';
+      const left = document.createElement('div');
+      left.innerHTML = `<strong>Setup ${setup.id}</strong> • HI avg: <span class="hi-color">${fmt(s.avg)}</span>`;
+      bar.appendChild(left);
 
-      const tdElev = document.createElement('td');
-      tdElev.className = 'ro'; tdElev.textContent = fmt(r.elev);
+      const del = document.createElement('button');
+      del.textContent = 'Delete selected row';
+      del.onclick = () => deleteSelectedRow(setup.id);
+      bar.appendChild(del);
 
-      const tdGps = document.createElement('td');
-      tdGps.contentEditable = true; tdGps.textContent = fmt(r.gps);
-      tdGps.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
-      tdGps.oninput = () => { r.gps = parseFloat(tdGps.textContent); updateGps(); saveCache(); };
-      function updateGps(){
-        const diff = (!isNaN(r.gps) && !isNaN(r.elev)) ? Math.abs(r.gps - r.elev) : NaN;
-        tdGps.className = '';
-        if(!isNaN(diff)){
-          if(diff <= 0.030) tdGps.classList.add('gps-green');
-          else if(diff <= 0.040) tdGps.classList.add('gps-yellow');
-          else tdGps.classList.add('gps-red');
+      sec.appendChild(bar);
+
+      // Table
+      const table = document.createElement('table');
+      table.innerHTML = `<thead><tr><th>ST</th><th>BS</th><th class="ro">HI</th><th>FS</th><th class="ro">ELEV</th><th>GPS</th></tr></thead>`;
+      const tbody = document.createElement('tbody');
+
+      setup.rows.forEach((r, ri) => {
+        const tr = document.createElement('tr');
+        tr.dataset.setup = setup.id; tr.dataset.index = ri;
+
+        const tdSt = document.createElement('td'); tdSt.textContent = r.station || '';
+
+        const tdBs = document.createElement('td');
+        if(r.type==='BS'){
+          tdBs.textContent = isNaN(r.bs)? '' : fmt(r.bs);
+          if(!setup.locked){
+            tdBs.contentEditable = true; tdBs.addEventListener('focus',()=>setTimeout(()=>document.execCommand('selectAll',false,null),0));
+            tdBs.addEventListener('input', () => { r.bs = parseFloat(tdBs.textContent); r.hi = (!isNaN(r.bs) && !isNaN(r.knownElev)) ? r.knownElev + r.bs : null; tdHi.textContent = fmt(r.hi); bar.firstChild.innerHTML = `<strong>Setup ${setup.id}</strong> • HI avg: <span class="hi-color">${fmt(hiStats(setup).avg)}</span>`; save(); });
+          }
         }
-      }
-      updateGps();
 
-      tr.append(tdSt, tdBs, tdHi, tdFs, tdElev, tdGps);
-      tb.appendChild(tr);
+        const tdHi = document.createElement('td'); tdHi.className = 'ro hi-color'; tdHi.textContent = fmt(r.hi);
+
+        const tdFs = document.createElement('td');
+        if(r.type==='FS'){
+          tdFs.textContent = isNaN(r.fs)? '' : fmt(r.fs);
+          if(!setup.locked){
+            tdFs.contentEditable = true; tdFs.addEventListener('focus',()=>setTimeout(()=>document.execCommand('selectAll',false,null),0));
+            tdFs.addEventListener('input', () => { r.fs = parseFloat(tdFs.textContent); const s = hiStats(setup); r.elev = (!isNaN(r.fs) && !isNaN(s.avg)) ? (s.avg - r.fs) : r.elev; tdElev.textContent = fmt(r.elev); updateGps(); save(); });
+          }
+        }
+
+        const tdElev = document.createElement('td'); tdElev.className = 'ro'; tdElev.textContent = fmt(r.elev);
+
+        const tdGps = document.createElement('td'); tdGps.textContent = isNaN(r.gps)? '' : fmt(r.gps);
+        function updateGps(){
+          const diff = (!isNaN(r.gps) && !isNaN(r.elev)) ? (r.gps - r.elev) : NaN;
+          tdGps.className = gpsClass(diff);
+        }
+        if(!setup.locked){
+          tdGps.contentEditable = true; tdGps.addEventListener('focus',()=>setTimeout(()=>document.execCommand('selectAll',false,null),0));
+          tdGps.addEventListener('input', () => { r.gps = parseFloat(tdGps.textContent); updateGps(); save(); });
+        }
+        updateGps();
+
+        tr.addEventListener('click', () => selectRow(setup.id, ri, tr));
+        tr.append(tdSt, tdBs, tdHi, tdFs, tdElev, tdGps);
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      sec.appendChild(table);
+      const legend = document.createElement('div'); legend.className='small'; legend.innerHTML = 'GPS QA: <span class="gps-green">≤ 0.030 m</span> • <span class="gps-yellow">≤ 0.040 m</span> • <span class="gps-red">&gt; 0.040 m</span>';
+      sec.appendChild(legend);
+
+      container.appendChild(sec);
     });
-    saveCache();
   }
 
-  $("addBs").onclick = () => {
-    const st = $("station").value.trim();
-    const known = parseFloat($("knownElev").value);
-    if(!st){ alert('Enter Station.'); return; }
-    rows.push({station:st, type:'BS', knownElev:isNaN(known)? null : known, bs:null, hi:null, fs:null, elev:known||null, gps:null, setupId});
-    $("station").value=''; $("knownElev").value='';
-    drawTable(); refreshHeader();
-  };
+  let selected = { setupId:null, index:null };
+  function selectRow(setupId, index, tr){
+    document.querySelectorAll('tr.selected').forEach(el=>el.classList.remove('selected'));
+    tr.classList.add('selected');
+    selected = { setupId, index };
+  }
+  function deleteSelectedRow(targetSetupId){
+    if(!selected.setupId || selected.setupId !== targetSetupId) return alert('Select a row in this setup first.');
+    const s = setups.find(x=>x.id===selected.setupId);
+    if(!s || s.locked) return alert('This setup is locked.');
+    if(!confirm('Delete the selected row?')) return;
+    s.rows.splice(selected.index,1); selected = {setupId:null,index:null}; save(); render();
+  }
+  function hasFs(setup){ return setup.rows.some(r=>r.type==='FS'); }
 
-  $("addFs").onclick = () => {
-    const st = $("station").value.trim();
+  // Buttons
+  document.getElementById('addBs').onclick = () => {
+    const st = document.getElementById('station').value.trim();
+    const known = parseFloat(document.getElementById('knownElev').value);
     if(!st){ alert('Enter Station.'); return; }
-    rows.push({station:st, type:'FS', knownElev:null, bs:null, hi:null, fs:null, elev:null, gps:null, setupId});
-    $("station").value=''; $("knownElev").value='';
-    drawTable(); refreshHeader();
-  };
-
-  $("newSetup").onclick = () => {
-    const lastElevRow = [...rows].reverse().find(r=>!isNaN(r.elev));
-    const carried = lastElevRow ? lastElevRow.elev : null;
-    setupId += 1; refreshHeader();
-    if(carried!=null){
-      rows.push({station:'TP', type:'BS', knownElev:carried, bs:null, hi:null, fs:null, elev:carried, gps:null, setupId});
+    const s = setups[cur];
+    if(hasFs(s)){
+      const goNew = confirm('You already have FS shots in Setup '+s.id+'. Start a NEW setup for this BS?');
+      if(goNew){ lockAndStartNew(); }
     }
-    drawTable(); refreshHeader();
+    setups[cur].rows.push({station:st, type:'BS', knownElev:isNaN(known)? null : known, bs:null, hi:null, fs:null, elev:isNaN(known)? null : known, gps:null});
+    document.getElementById('station').value=''; document.getElementById('knownElev').value='';
+    save(); render();
   };
 
-  refreshHeader(); drawTable();
+  document.getElementById('addFs').onclick = () => {
+    const st = document.getElementById('station').value.trim();
+    if(!st){ alert('Enter Station.'); return; }
+    setups[cur].rows.push({station:st, type:'FS', knownElev:null, bs:null, hi:null, fs:null, elev:null, gps:null});
+    document.getElementById('station').value=''; document.getElementById('knownElev').value='';
+    save(); render();
+  };
+
+  function lockAndStartNew(){
+    // lock current
+    const s = setups[cur]; s.locked = true;
+    // carry last elev
+    const lastElevRow = [...s.rows].reverse().find(r=>!isNaN(r.elev));
+    const carried = lastElevRow ? lastElevRow.elev : null;
+    newSetup(carried); // no auto TP row
+  }
+
+  document.getElementById('newSetup').onclick = () => {
+    if(!setups.length){ newSetup(); return; }
+    if(!confirm('Create a new setup and lock the previous table?')) return;
+    lockAndStartNew();
+  };
+
+  // Init: date + state
+  document.getElementById('dateOfSurvey').valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
+  if(!load()) newSetup();
+  render();
 })();
 </script>
 </body>
