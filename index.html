@@ -12,50 +12,54 @@
     .wrap{max-width:1200px;margin:0 auto;padding:0 12px}
     .card{background:#fff;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,0.08);padding:var(--pad);margin:var(--pad) auto}
     input,button{font-size:15px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111;padding:6px 8px}
-    button{cursor:pointer;font-weight:600;flex:1;transition:background 0.2s}
-    button.primary{background:#007aff;color:#fff;border:none}
+    button{cursor:pointer;font-weight:600;transition:background 0.2s}
     button.ghost{background:#f2f2f7}
     button:hover{opacity:0.9}
     .row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
     .row>div{flex:1 1 140px}
+    .btnbar{display:flex;gap:6px}
+    .btnbar button{flex:1 1 0}
     table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:16px;margin-bottom:8px}
     thead th{position:sticky;top:0;background:#f9f9f9;padding:6px}
-    th,td{border:1px solid #ddd;padding:6px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    th,td{border:1px solid #ddd;padding:8px 6px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    tbody tr:nth-child(even) td{background:#fbfbfd}
+    tr.selected td{outline:2px solid #0A84FF; outline-offset:-2px}
     td.ro{background:#fafafa;font-weight:600}
-    td[contenteditable="true"]{background:#f0f8ff;outline:none}
+    td[contenteditable="true"]{background:#f0f8ff !important;outline:none}
     .small{font-size:12px;opacity:.9}
     .gps-green{color:#0a7a25;font-weight:600}
     .gps-yellow{color:#cc8800;font-weight:600}
     .gps-red{color:#b00020;font-weight:600}
     .setup{margin-top:16px;padding:10px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);border-top-width:4px;border-top-style:solid}
-    .setup-1{border-top-color:#007aff;}
-    .setup-2{border-top-color:#34c759;}
-    .setup-3{border-top-color:#ff9500;}
-    .setup-4{border-top-color:#ff3b30;}
+    .setup-1{border-top-color:#007aff}
+    .setup-2{border-top-color:#34c759}
+    .setup-3{border-top-color:#ff9500}
+    .setup-4{border-top-color:#ff3b30}
     .setup h3{margin:0 0 8px;font-size:15px;font-weight:600}
+    .toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-bottom:6px}
 
-  @media (max-width: 600px){
-    .wrap{max-width:100%}
-    .row{flex-direction:column; align-items:stretch}
-    .row>div{flex:1 1 auto; width:100%}
-    label{display:block; margin-bottom:4px; font-weight:600}
-    input{width:100%}
-    .btnbar{display:flex; flex-direction:row; gap:4px; margin-top:4px}
-    table{font-size:13px}
-    th, td{padding:4px}
-    th:nth-child(1){width:50px}
-    th:nth-child(2){width:50px}
-    th:nth-child(3){width:60px}
-    th:nth-child(4){width:50px}
-    th:nth-child(5){width:70px}
-    th:nth-child(6){width:65px}
-  }
-  @media (min-width: 900px){
-    body{font-size:17px}
-    input,button{font-size:16px}
-    table{font-size:16px}
-  }
-</style>
+    @media (max-width: 600px){
+      .wrap{max-width:100%}
+      .row{flex-direction:column; align-items:stretch}
+      .row>div{flex:1 1 auto; width:100%}
+      label{display:block; margin-bottom:4px; font-weight:600}
+      input{width:100%}
+      .btnbar{gap:4px}
+      table{font-size:13px}
+      th, td{padding:4px}
+      th:nth-child(1){width:50px}
+      th:nth-child(2){width:50px}
+      th:nth-child(3){width:60px}
+      th:nth-child(4){width:50px}
+      th:nth-child(5){width:70px}
+      th:nth-child(6){width:65px}
+    }
+    @media (min-width: 900px){
+      body{font-size:17px}
+      input,button{font-size:16px}
+      table{font-size:16px}
+    }
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -77,44 +81,78 @@
 
   <div id="setups"></div>
 
-  <!-- Reset area at the very bottom; hidden until there is data -->
+  <!-- Saved Jobs manager + Export/Import -->
+  <div id="jobsArea" class="card">
+    <div class="row" style="align-items:center">
+      <div style="flex:2 1 260px">
+        <label>Save snapshot as<br>
+          <input id="jobName" placeholder="e.g., Elderberry Landing – Aug 14" />
+        </label>
+        <div class="small">Snapshots are stored on this device.</div>
+      </div>
+      <div style="flex:0 0 auto; display:flex; gap:6px; align-items:center; flex-wrap:wrap">
+        <button id="saveJob" class="ghost">Save Snapshot</button>
+        <button id="exportCurrentCsv" class="ghost" title="Open in Excel/Sheets">Backup (Spreadsheet)</button>
+        <button id="exportCurrentJson" class="ghost" title="Perfect copy to restore later">Backup (Full)</button>
+        <button id="shareCurrentCsv" class="ghost" title="Share via phone apps">Share Backup</button>
+      </div>
+    </div>
+    <div class="row" style="align-items:center; margin-top:6px">
+      <div style="flex:1 1 auto">
+        <div id="jobsList" class="small">No saved snapshots yet.</div>
+      </div>
+      <div style="flex:0 0 auto; display:flex; gap:6px; align-items:center">
+        <input id="importFile" type="file" accept="application/json" />
+        <button id="importBtn" class="ghost" title="Restore a saved snapshot file">Restore from file</button>
+      </div>
+    </div>
+    <div class="small">Spreadsheet = easy to open • Full = best for restore</div>
+  </div>
+
+  <!-- Reset area -->
   <div id="resetArea" class="card" style="display:none">
     <button id="resetJob" class="ghost" style="width:100%">Reset Job</button>
-    <div class="small">This clears all cached data for this job from this device.</div>
+    <div class="small">This clears the current job cache from this device. Saved snapshots remain.</div>
   </div>
 </div>
 
 <script>
 (() => {
+  const JOBS_KEY = 'fieldBookJobs_v1';
+  const GPS_OK = 0.030, GPS_YEL = 0.040;
+
   let setupId = 0;
   let setups = [];
-  let meta = {jobTitle:"", dateOfSurvey:""};
+  let meta = { jobTitle:'', dateOfSurvey:'' };
+  let selected = { setupIndex:null, rowIndex:null };
 
   const $ = id => document.getElementById(id);
   const fmt = n => (n==null||isNaN(n) ? '' : Number(n).toFixed(3));
 
+  // init date
   $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
 
+  // load cache
   if(localStorage.fieldBookData){
     try {
       const saved = JSON.parse(localStorage.fieldBookData);
       setups = saved.setups||[];
-      setupId = setups.length;
-      meta = saved.meta||meta;
-      $("jobTitle").value = meta.jobTitle||"";
+      meta = saved.meta || meta;
+      if(meta.jobTitle) $("jobTitle").value = meta.jobTitle;
       if(meta.dateOfSurvey) $("dateOfSurvey").value = meta.dateOfSurvey;
+      setupId = setups.length;
     }catch(e){}
   }
 
+  // debounce saving
+  let saveTimer=null;
   function saveCache(){
     meta.jobTitle = $("jobTitle").value;
     meta.dateOfSurvey = $("dateOfSurvey").value;
     localStorage.fieldBookData = JSON.stringify({setups, meta});
-    $("resetArea").style.display = setups.some(s=>s.rows.length>0) ? "block" : "none";
+    $("resetArea").style.display = setups.some(s=>s.rows?.length>0) ? "block" : "none";
   }
-
-  $("jobTitle").oninput = saveCache;
-  $("dateOfSurvey").oninput = saveCache;
+  function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveCache, 250); }
 
   function hiStats(rows){
     const bsRows = rows.filter(r=>r.type==='BS' && !isNaN(r.hi));
@@ -123,46 +161,105 @@
     return {avg:his.reduce((a,b)=>a+b,0)/his.length};
   }
 
-  function draw(){
+  function gpsClass(diff){
+    if(isNaN(diff)) return '';
+    if(Math.abs(diff) <= GPS_OK) return 'gps-green';
+    if(Math.abs(diff) <= GPS_YEL) return 'gps-yellow';
+    return 'gps-red';
+  }
+
+  function sanitizeNumber(el){
+    let t=el.textContent; t=t.replace(/[^0-9.\-]/g,''); t=t.replace(/(\.)(?=.*\.)/g,''); t=t.replace(/(?!^)-/g,''); el.textContent=t; return t;
+  }
+
+  function render(){
     const container = $("setups");
     container.innerHTML = '';
-    setups.forEach((setup,idx)=>{
-      const stats = hiStats(setup.rows);
-      const div = document.createElement('div');
-      div.className = `card setup setup-${(idx%4)+1}`;
-      div.innerHTML = `<h3>Setup ${idx+1} • HI avg: ${fmt(stats.avg)}</h3>`;
+
+    setups.forEach((setup, si) => {
+      const s = hiStats(setup.rows||[]);
+      const sec = document.createElement('section');
+      sec.className = `card setup setup-${(si%4)+1}`;
+
+      const bar = document.createElement('div');
+      bar.className = 'toolbar';
+      const left = document.createElement('h3'); left.textContent = `Setup ${si+1} • HI avg: ${fmt(s.avg)}`;
+      bar.appendChild(left);
+      const delBtn = document.createElement('button'); delBtn.className='ghost'; delBtn.textContent='Delete selected row';
+      delBtn.onclick = () => deleteSelectedRow(si);
+      bar.appendChild(delBtn);
+      sec.appendChild(bar);
+
       const table = document.createElement('table');
-      table.innerHTML = `<thead><tr><th>ST</th><th>BS</th><th>HI</th><th>FS</th><th>ELEV</th><th>GPS</th></tr></thead><tbody></tbody>`;
-      const tb = table.querySelector('tbody');
-      setup.rows.forEach(r=>{
+      table.innerHTML = `<thead><tr><th>ST</th><th>BS</th><th>HI</th><th>FS</th><th>ELEV</th><th>GPS</th></tr></thead>`;
+      const tbody = document.createElement('tbody');
+
+      (setup.rows||[]).forEach((r, ri) => {
         const tr = document.createElement('tr');
-        const tdSt = document.createElement('td'); tdSt.textContent = r.station||'';
+
+        const tdSt = document.createElement('td');
+        tdSt.contentEditable = true; tdSt.textContent = r.station||'';
+        tdSt.oninput = ()=>{ r.station = tdSt.textContent.trim(); scheduleSave(); };
+
         const tdBs = document.createElement('td');
         if(r.type==='BS'){
           tdBs.contentEditable=true; tdBs.textContent=fmt(r.bs);
-          tdBs.oninput=()=>{r.bs=parseFloat(tdBs.textContent);r.hi=(!isNaN(r.bs)&&!isNaN(r.knownElev))?(r.knownElev+r.bs):null;tdHi.textContent=fmt(r.hi);saveCache();draw();};
+          tdBs.oninput=()=>{ sanitizeNumber(tdBs); r.bs=parseFloat(tdBs.textContent); r.hi=(!isNaN(r.bs)&&!isNaN(r.knownElev))?(r.knownElev+r.bs):null; tdHi.textContent=fmt(r.hi); left.textContent = `Setup ${si+1} • HI avg: ${fmt(hiStats(setup.rows).avg)}`; scheduleSave(); };
+          tdBs.onblur=()=>{ if(!isNaN(r.bs)) tdBs.textContent=fmt(r.bs); };
         }
-        const tdHi=document.createElement('td');tdHi.className='ro';tdHi.textContent=fmt(r.hi);
+
+        const tdHi=document.createElement('td'); tdHi.className='ro'; tdHi.textContent=fmt(r.hi);
+
         const tdFs=document.createElement('td');
         if(r.type==='FS'){
-          tdFs.contentEditable=true;tdFs.textContent=fmt(r.fs);
-          tdFs.oninput=()=>{r.fs=parseFloat(tdFs.textContent);const s=hiStats(setup.rows);r.elev=(!isNaN(r.fs)&&!isNaN(s.avg))?(s.avg-r.fs):r.elev;tdElev.textContent=fmt(r.elev);saveCache();};
+          tdFs.contentEditable=true; tdFs.textContent=fmt(r.fs);
+          tdFs.oninput=()=>{ sanitizeNumber(tdFs); r.fs=parseFloat(tdFs.textContent); const stats=hiStats(setup.rows); r.elev=(!isNaN(r.fs)&&!isNaN(stats.avg))?(stats.avg-r.fs):r.elev; tdElev.textContent=fmt(r.elev); scheduleSave(); };
+          tdFs.onblur=()=>{ if(!isNaN(r.fs)) tdFs.textContent=fmt(r.fs); };
         }
-        const tdElev=document.createElement('td');tdElev.className='ro';tdElev.textContent=fmt(r.elev);
-        const tdGps=document.createElement('td');tdGps.contentEditable=true;tdGps.textContent=fmt(r.gps);
-        tdGps.oninput=()=>{r.gps=parseFloat(tdGps.textContent);updateGps();saveCache();};
-        function updateGps(){const diff=(!isNaN(r.gps)&&!isNaN(r.elev))?Math.abs(r.gps-r.elev):NaN;tdGps.className='';if(!isNaN(diff)){if(diff<=0.030)tdGps.classList.add('gps-green');else if(diff<=0.040)tdGps.classList.add('gps-yellow');else tdGps.classList.add('gps-red');}}
+
+        const tdElev=document.createElement('td'); tdElev.className='ro'; tdElev.textContent=fmt(r.elev);
+
+        const tdGps=document.createElement('td'); tdGps.contentEditable=true; tdGps.textContent=fmt(r.gps);
+        function updateGps(){ const diff=(!isNaN(r.gps)&&!isNaN(r.elev))?Math.abs(r.gps-r.elev):NaN; tdGps.className=gpsClass(diff); }
+        tdGps.oninput=()=>{ sanitizeNumber(tdGps); r.gps=parseFloat(tdGps.textContent); updateGps(); scheduleSave(); };
+        tdGps.onblur=()=>{ if(!isNaN(r.gps)) tdGps.textContent=fmt(r.gps); };
         updateGps();
+
+        // row click for selection (without interfering with editing)
+        tr.onclick = (e)=>{
+          if(e.target.isContentEditable) return; // don’t select when editing
+          document.querySelectorAll('tr.selected').forEach(el=>el.classList.remove('selected'));
+          tr.classList.add('selected');
+          selected = { setupIndex: si, rowIndex: ri };
+        };
+
         tr.append(tdSt,tdBs,tdHi,tdFs,tdElev,tdGps);
-        tb.appendChild(tr);
+        tbody.appendChild(tr);
       });
-      div.appendChild(table);
-      div.innerHTML += '<div class="small">GPS QA: <span class="gps-green">≤ 0.030 m</span> • <span class="gps-yellow">≤ 0.040 m</span> • <span class="gps-red">&gt; 0.040 m</span></div>';
-      container.appendChild(div);
+
+      table.appendChild(tbody);
+      sec.appendChild(table);
+
+      const legend = document.createElement('div'); legend.className='small'; legend.innerHTML = 'GPS QA: <span class="gps-green">≤ 0.030 m</span> • <span class="gps-yellow">≤ 0.040 m</span> • <span class="gps-red">&gt; 0.040 m</span>';
+      sec.appendChild(legend);
+
+      container.appendChild(sec);
     });
+
     saveCache();
   }
 
+  function deleteSelectedRow(forSetup){
+    if(selected.setupIndex!==forSetup){ alert('Select a row in this setup first.'); return; }
+    const s = setups[forSetup]; if(!s){ return; }
+    if(typeof selected.rowIndex !== 'number'){ alert('No row selected.'); return; }
+    if(!confirm('Delete the selected row?')) return;
+    s.rows.splice(selected.rowIndex,1);
+    selected = { setupIndex:null, rowIndex:null };
+    render();
+  }
+
+  // ---- Buttons ----
   $("addBs").onclick=()=>{
     const st=$("station").value.trim();
     const known=parseFloat($("knownElev").value);
@@ -171,7 +268,7 @@
     const setup=setups[setupId-1];
     setup.rows.push({station:st,type:'BS',knownElev:isNaN(known)?null:known,bs:null,hi:null,fs:null,elev:known||null,gps:null});
     $("station").value='';$("knownElev").value='';
-    draw();
+    render();
   };
 
   $("addFs").onclick=()=>{
@@ -181,28 +278,33 @@
     const setup=setups[setupId-1];
     setup.rows.push({station:st,type:'FS',bs:null,hi:null,fs:null,elev:null,gps:null});
     $("station").value='';
-    draw();
+    render();
   };
 
   $("newSetup").onclick=()=>{
-    if(setups.length===0){ setupId=1; setups.push({rows:[]}); draw(); return; }
+    if(setups.length===0){ setupId=1; setups.push({rows:[]}); render(); return; }
     if(confirm('Create a new setup and lock the previous one?')){
-      setupId+=1; setups.push({rows:[]});
-      draw();
+      setupId+=1; setups.push({rows:[]}); render();
     }
   };
 
   $("resetJob").onclick=()=>{
-    if(localStorage.fieldBookData && confirm('Resetting will clear all data for this job. Continue?')){
-      localStorage.removeItem('fieldBookData');
-      setups=[];setupId=0;meta={jobTitle:"",dateOfSurvey:""};
-      $("jobTitle").value="";$("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
-      draw();
+    if(localStorage.fieldBookData && confirm('Resetting will clear the CURRENT job cache. Saved snapshots remain. Continue?')){
+      delete localStorage.fieldBookData;
+      setups = [];
+      setupId = 0;
+      meta = { jobTitle:'', dateOfSurvey:'' };
+      selected = { setupIndex:null, rowIndex:null };
+      $("jobTitle").value = '';
+      $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
+      $("station").value = '';
+      $("knownElev").value = '';
+      render();
     }
   };
 
-  if(setups.length===0){ setupId=1; setups.push({rows:[]}); }
-  draw();
+  // initial render
+  render();
 })();
 </script>
 </body>
