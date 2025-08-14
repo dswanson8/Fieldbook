@@ -88,6 +88,7 @@
 (() => {
   let setupId = 0;
   let setups = [];
+  let meta = {jobTitle:"", dateOfSurvey:""};
 
   const $ = id => document.getElementById(id);
   const fmt = n => (n==null||isNaN(n) ? '' : Number(n).toFixed(3));
@@ -99,13 +100,21 @@
       const saved = JSON.parse(localStorage.fieldBookData);
       setups = saved.setups||[];
       setupId = setups.length;
+      meta = saved.meta||meta;
+      $("jobTitle").value = meta.jobTitle||"";
+      if(meta.dateOfSurvey) $("dateOfSurvey").value = meta.dateOfSurvey;
     }catch(e){}
   }
 
   function saveCache(){
-    localStorage.fieldBookData = JSON.stringify({setups});
+    meta.jobTitle = $("jobTitle").value;
+    meta.dateOfSurvey = $("dateOfSurvey").value;
+    localStorage.fieldBookData = JSON.stringify({setups, meta});
     $("resetArea").style.display = setups.some(s=>s.rows.length>0) ? "block" : "none";
   }
+
+  $("jobTitle").oninput = saveCache;
+  $("dateOfSurvey").oninput = saveCache;
 
   function hiStats(rows){
     const bsRows = rows.filter(r=>r.type==='BS' && !isNaN(r.hi));
@@ -186,7 +195,8 @@
   $("resetJob").onclick=()=>{
     if(localStorage.fieldBookData && confirm('Resetting will clear all data for this job. Continue?')){
       localStorage.removeItem('fieldBookData');
-      setups=[];setupId=0;
+      setups=[];setupId=0;meta={jobTitle:"",dateOfSurvey:""};
+      $("jobTitle").value="";$("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
       draw();
     }
   };
