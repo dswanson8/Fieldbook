@@ -7,24 +7,25 @@
   <style>
     :root{--pad:8px;--radius:12px;--accent:#0A84FF;--text:#111314;--separator:#E5E5EA;--bg:#FFFFFF;--bg-soft:#F9F9FB;--shadow:0 8px 24px rgba(0,0,0,0.06)}
     *{box-sizing:border-box}
-    body{margin:0;background:#fff;color:#111;font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Segoe UI, Roboto, Helvetica, Arial, sans-serif;font-size:14px}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Segoe UI, Roboto, Helvetica, Arial, sans-serif;font-size:14px}
     header{padding:var(--pad)}
     .wrap{max-width:1200px;margin:0 auto;padding:0 12px}
     .card{background:var(--bg);padding:var(--pad);margin:var(--pad) auto;border-radius:var(--radius);box-shadow:var(--shadow)}
     input,button{font-size:14px;border-radius:10px;border:1px solid var(--separator);background:var(--bg);color:var(--text);padding:8px 10px;transition:box-shadow .15s ease, background .15s ease}
     button{cursor:pointer;font-weight:600;flex:1}
     button.primary{background:#ffd400}
-    button.ghost{background:var(--bg);}
+    button.ghost{background:var(--bg)}
     button:hover{background:#F2F2F7}
     button:active{background:#E5E5EA}
     input:focus,button:focus{outline:none;box-shadow:0 0 0 2px var(--accent)}
     .row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
     .row>div{flex:1 1 140px}
     table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px;background:var(--bg);border:1px solid var(--separator);border-radius:12px;overflow:hidden}
-    thead th{position:sticky;top:0;background:var(--bg-soft);padding:8px;font-weight:600;border-bottom:1px solid var(--separator);box-shadow:0 1px 0 var(--separator);}
+    thead th{position:sticky;top:0;background:var(--bg-soft);padding:8px;font-weight:600;border-bottom:1px solid var(--separator);box-shadow:0 1px 0 var(--separator)}
     th,td{border-bottom:1px solid var(--separator);padding:8px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     td.ro{background:#FAFAFC;font-weight:600}
-    td[contenteditable="true"]{background:#fff}
+    td[contenteditable="true"]{background:#F0F8FF; /* soft blue hue */}
+    td[contenteditable="true"]:focus{outline:2px solid var(--accent);background:#E6F0FF}
     .small{font-size:11px;opacity:.9}
     .chip{padding:2px 8px;background:#fff;font-weight:600}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
@@ -53,9 +54,6 @@
     input,button{font-size:16px}
     table{font-size:14px}
     .wrap{max-width:1280px}
-  }
-    input,button{font-size:16px}
-    table{font-size:14px}
   }
 </style>
 </head>
@@ -98,7 +96,6 @@
 
 <script>
 (() => {
-  const MM3 = 0.003;
   let setupId = 1;
   let rows = [];
 
@@ -142,25 +139,30 @@
       const tr = document.createElement('tr');
       const tdSt = document.createElement('td');
       tdSt.textContent = r.station || '';
+
       const tdBs = document.createElement('td');
       if(r.type==='BS'){
         tdBs.contentEditable = true; tdBs.textContent = fmt(r.bs);
-        tdBs.onfocus = () => {document.execCommand('selectAll',false,null)};
+        tdBs.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
         tdBs.oninput = () => { r.bs = parseFloat(tdBs.textContent); r.hi = (!isNaN(r.bs) && !isNaN(r.knownElev)) ? (r.knownElev + r.bs) : null; tdHi.textContent = fmt(r.hi); refreshHeader(); saveCache(); };
       } else { tdBs.textContent = ''; }
+
       const tdHi = document.createElement('td');
       tdHi.className = 'ro'; tdHi.textContent = fmt(r.hi);
+
       const tdFs = document.createElement('td');
       if(r.type==='FS'){
         tdFs.contentEditable = true; tdFs.textContent = fmt(r.fs);
-        tdFs.onfocus = () => {document.execCommand('selectAll',false,null)};
+        tdFs.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
         tdFs.oninput = () => { r.fs = parseFloat(tdFs.textContent); const s = hiStats(); r.elev = (!isNaN(r.fs) && !isNaN(s.avg)) ? (s.avg - r.fs) : r.elev; tdElev.textContent = fmt(r.elev); saveCache(); };
       } else { tdFs.textContent = ''; }
+
       const tdElev = document.createElement('td');
       tdElev.className = 'ro'; tdElev.textContent = fmt(r.elev);
+
       const tdGps = document.createElement('td');
       tdGps.contentEditable = true; tdGps.textContent = fmt(r.gps);
-      tdGps.onfocus = () => {document.execCommand('selectAll',false,null)};
+      tdGps.onfocus = () => { setTimeout(()=>document.execCommand('selectAll',false,null),0); };
       tdGps.oninput = () => { r.gps = parseFloat(tdGps.textContent); updateGps(); saveCache(); };
       function updateGps(){
         const diff = (!isNaN(r.gps) && !isNaN(r.elev)) ? Math.abs(r.gps - r.elev) : NaN;
@@ -172,6 +174,7 @@
         }
       }
       updateGps();
+
       tr.append(tdSt, tdBs, tdHi, tdFs, tdElev, tdGps);
       tb.appendChild(tr);
     });
