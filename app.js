@@ -9,7 +9,7 @@
   - localStorage with version bust
 */
 (function () {
-    const APP_VERSION = '2025.10.30-3';
+    const APP_VERSION = '2025.10.30-4';
     const STORAGE_KEY = 'dfb_v3_state';
 
     const els = {
@@ -148,8 +148,21 @@
             // ELEV: BS=Known Elev (editable), FS=calc elev
             tr.appendChild(r.type === 'BS' ? makeCell(r, 'knownElev', r.knownElev, s.locked) : makeCalc(r.elev));
 
-            // GPS (only for FS rows)
-            tr.appendChild(r.type === 'FS' ? makeCell(r, 'gps', r.gps, s.locked) : tdDim());
+            // GPS (FS editable + color by Δ = |GPS - ELEV|)
+            if (r.type === 'FS') {
+                const tdGps = makeCell(r, 'gps', r.gps, s.locked);
+                if (isNum(r.delta)) {
+                    const thr = state.meta.thresholds; // { green:0.030, yellow:0.040 }
+                    tdGps.classList.add(
+                        r.delta <= thr.green ? 'qa-green' :
+                            r.delta <= thr.yellow ? 'qa-yellow' : 'qa-red'
+                    );
+                }
+                tr.appendChild(tdGps);
+            } else {
+                tr.appendChild(tdDim());
+            }
+
 
             els.gridBody.appendChild(tr);
         });
@@ -177,10 +190,18 @@
         return td;
     }
 
-    function makeCalc(value) {
+    function makeCalc(value, delta) {
         const td = document.createElement('td');
         td.className = 'cell-calc';
         td.textContent = isNum(value) ? num3(value) : '—';
+
+        // If it's a GPS delta cell, apply color code
+        if (isNum(delta)) {
+            if (delta <= 0.030) td.classList.add('qa-green');
+            else if (delta <= 0.040) td.classList.add('qa-yellow');
+            else td.classList.add('qa-red');
+        }
+
         return td;
     }
 
