@@ -1,0 +1,277 @@
+:root {
+    --bg: #ffffff;
+    --card: #f9fafb;
+    --muted: #4b5563;
+    --text: #111827;
+    --accent: #2563eb;
+    --accent-2: #16a34a;
+    --warn: #d97706;
+    --bad: #dc2626;
+    --calc: #f3f4f6;
+    --calc-border: #e5e7eb;
+    --border: black;
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    padding: 5px;
+}
+
+.wrap {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: saturate(180%) blur(6px);
+}
+
+.head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px 0
+}
+
+.meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px
+}
+
+.meta input {
+    width: 100%
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px
+}
+
+/* Touch toolbar */
+.toolbar {}
+
+.toolbar .seg {
+    grid-column: span 2;
+}
+
+.toolbar .wide {
+    grid-column: span 2;
+}
+
+@media (min-width:560px) {
+    .toolbar {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+button,
+.seg label {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--text);
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .2px;
+    cursor: pointer;
+    user-select: none;
+    display: block;
+    width: 100%;
+    margin: 10px 0px;
+    border: 2px solid black;
+}
+
+button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff
+}
+
+button.ghost {
+    background: #fff
+}
+
+.seg {
+    display: flex;
+    overflow: hidden;
+    gap: 10px;
+}
+
+.seg input {
+    display: none
+}
+
+.seg label {
+    padding: 10px 12px;
+    background: #fff;
+    text-align: center;
+    margin: 0px;
+}
+
+.seg input:checked+label {
+    background: #eff6ff;
+    color: #1d4ed8
+}
+
+.chips {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+}
+
+.chip {
+    text-align: center;
+    padding: 8px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: #fff;
+}
+
+.chip button {
+    width: min-content;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 8px;
+    table-layout: fixed
+}
+
+colgroup col.sta {
+    width: 22%
+}
+
+colgroup col.small {
+    width: 15.6%
+}
+
+/* five equal small columns */
+thead th {
+    position: sticky;
+    top: 92px;
+    z-index: 20;
+    background: #fff;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+    font-size: 13px
+}
+
+tbody td {
+    border-bottom: 1px solid var(--border);
+    /* padding: 10px 5px; */
+    font-size: 16px;
+    vertical-align: middle
+}
+
+.cell-edit {
+    background: #fff;
+    border: 1px solid var(--border);
+    min-height: 44px
+}
+
+.cell-edit:focus-within {
+    outline: 0;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .25)
+}
+
+.cell-calc {
+    background: var(--calc);
+    color: #111827;
+    border: 1px solid var(--calc-border);
+    text-align: center;
+}
+
+.cell-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    font: 600 18px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    outline: none;
+    padding: 10px 2px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.cell-input::placeholder {
+    color: #9ca3af
+}
+
+.qa-green {
+    background: rgba(22, 163, 74, .1) !important;
+    color: #166534 !important
+}
+
+.qa-yellow {
+    background: rgba(234, 179, 8, .15) !important;
+    color: #92400e !important
+}
+
+.qa-red {
+    background: rgba(220, 38, 38, .12) !important;
+    color: #991b1b !important
+}
+
+.footerbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin-top: 10px
+}
+
+.footerbar .card {
+    display: block;
+}
+
+input,
+select {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px
+}
+
+input::placeholder {
+    color: #9ca3af
+}
+
+#summary {
+    font-size: 12px;
+}
+
+#summary b {
+    color: #111;
+    font-weight: 700;
+}
