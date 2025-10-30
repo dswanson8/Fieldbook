@@ -8,7 +8,8 @@
   - LocalStorage persistence
 */
 (function(){
-  const STORAGE_KEY = 'dfb_v2_state';
+  const APP_VERSION = '2025.10.30-1';
+  const STORAGE_KEY = 'dfb_v3_state';
 
   const els = {
     title: byId('jobTitle'),
@@ -28,7 +29,7 @@
   };
 
   const state = loadState() || {
-    meta: { title:'', date: todayISO(), thresholds:{ green:0.030, yellow:0.040 } },
+    meta: { title:'', date: todayISO(), thresholds:{ green:0.030, yellow:0.040 }, appVersion: APP_VERSION },
     settings: { useMedian: true },
     setups: [],
     active: 0, // index
@@ -84,6 +85,7 @@
   function commitMeta(){
     state.meta.title = els.title.value.trim();
     state.meta.date = els.date.value || todayISO();
+    state.meta.appVersion = APP_VERSION; // keep in sync
     saveState();
   }
 
@@ -254,7 +256,7 @@
     return td;
   }
 
-  function isEditableField(row, field){(row, field){
+  function isEditableField(row, field){
     if(field === 'station') return true;
     if(row.type==='BS') return (field==='knownElev' || field==='bs');
     if(row.type==='FS') return (field==='fs' || field==='gps');
@@ -287,9 +289,23 @@
     catch(e){ setStatus('Save failed'); console.error(e); }
   }
   function loadState(){
-    try{ const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; }
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      const s = JSON.parse(raw);
+      // Version check: if stored version mismatches current app, start fresh
+      if(!s?.meta?.appVersion || s.meta.appVersion !== APP_VERSION){
+        // Optionally keep a backup for debugging
+        try{ localStorage.setItem(STORAGE_KEY + '_backup_' + Date.now(), raw); }catch(e){}
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return s;
+    } catch(e){ return null; }
+  }
     catch(e){ return null; }
   }
+
   function hardReset(){
     if(confirm('Reset all data?')){
       localStorage.removeItem(STORAGE_KEY); location.reload();
@@ -317,6 +333,6 @@
     const n = Number(cleaned);
     return isFinite(n) ? n : null;
   }
-  function setStatus(msg){(msg){ els.status.textContent = msg; setTimeout(()=>{ els.status.textContent='Ready'; }, 1200); }
+  function setStatus(msg){ els.status.textContent = msg; setTimeout(()=>{ els.status.textContent='Ready'; }, 1200); }
   function flash(msg){ setStatus(msg); }
 })();
