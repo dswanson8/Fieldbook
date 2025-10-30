@@ -120,7 +120,7 @@
       const b = document.createElement('button');
       b.className = 'chip';
       b.textContent = `Setup ${i+1}${s.locked?' 🔒':''}`;
-      if(i===state.active){ b.style.borderColor = '#0ea5e9'; b.style.color = '#7dd3fc'; }
+      if(i===state.active){ b.style.borderColor = '#60a5fa'; b.style.color = '#1d4ed8'; }
       b.addEventListener('click', ()=>{ state.active = i; render(); saveState(); });
       els.tabs.appendChild(b);
     });
@@ -135,40 +135,25 @@
     s.rows.forEach((r, idx) => {
       const tr = document.createElement('tr');
 
-      // Type pill
-      tr.appendChild(tdPill(r.type));
+      // STA (station)
+      const tdSta = makeCell(r, 'station', r.station, s.locked);
+      attachRowDelete(tdSta, s, idx);
+      tr.appendChild(tdSta);
 
-      // Station (editable both types)
-      tr.appendChild(makeCell(r, 'station', r.station, s.locked));
-
-      // Known Elev (BS only)
-      tr.appendChild(r.type==='BS' ? makeCell(r,'knownElev', r.knownElev, s.locked) : tdDim());
-
-      // BS (m) or dim
+      // BS
       tr.appendChild(r.type==='BS' ? makeCell(r,'bs', r.bs, s.locked) : tdDim());
 
-      // HI (calc)
+      // HI
       tr.appendChild(makeCalc(r.hi));
 
-      // FS (m) or dim
+      // FS
       tr.appendChild(r.type==='FS' ? makeCell(r,'fs', r.fs, s.locked) : tdDim());
 
-      // ELEV (calc)
-      tr.appendChild(makeCalc(r.elev));
+      // ELEV
+      tr.appendChild(r.type==='BS' ? makeCell(r,'knownElev', r.knownElev, s.locked) : makeCalc(r.elev));
 
-      // GPS (FS editable)
+      // GPS
       tr.appendChild(r.type==='FS' ? makeCell(r,'gps', r.gps, s.locked) : tdDim());
-
-      // Δ GPS (calc + colored)
-      tr.appendChild(makeDelta(r.delta));
-
-      // Delete
-      const tdDel = document.createElement('td');
-      const del = document.createElement('button');
-      del.textContent = '✕'; del.className='ghost';
-      del.addEventListener('click', ()=>{ if(s.locked) return flash('Setup is locked'); s.rows.splice(idx,1); recompute(s); render(); saveState(); });
-      tdDel.appendChild(del);
-      tr.appendChild(tdDel);
 
       els.gridBody.appendChild(tr);
     });
@@ -176,16 +161,21 @@
     updateSummary();
   }
 
-  function tdPill(type){
-    const td = document.createElement('td');
-    const span = document.createElement('span');
-    span.className = 'pill ' + (type==='BS'?'type-bs':'type-fs');
-    span.textContent = type;
-    td.appendChild(span);
-    return td;
+  function attachRowDelete(td, setup, idx){
+    let timer=null;
+    const start=()=>{ timer=setTimeout(()=>{ if(setup.locked) return flash('Setup is locked'); if(confirm('Delete this row?')){ setup.rows.splice(idx,1); recompute(setup); render(); saveState(); } }, 600); };
+    const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+    td.addEventListener('touchstart', start, {passive:true});
+    td.addEventListener('touchend', clear);
+    td.addEventListener('touchmove', clear);
+    td.addEventListener('mousedown', start);
+    td.addEventListener('mouseup', clear);
+    td.addEventListener('mouseleave', clear);
+    td.addEventListener('contextmenu', (e)=>{ e.preventDefault(); if(setup.locked) return flash('Setup is locked'); if(confirm('Delete this row?')){ setup.rows.splice(idx,1); recompute(setup); render(); saveState(); } });
   }
 
-  function tdDim(){ const td=document.createElement('td'); td.textContent='—'; td.className='cell-calc'; return td; }
+
+  function tdDim(){ const td=document.createElement('td'); td.textContent='—'; td.className='cell-calc'; return td; }(){ const td=document.createElement('td'); td.textContent='—'; td.className='cell-calc'; return td; }
 
   function makeCalc(value){
     const td = document.createElement('td');
@@ -194,15 +184,7 @@
     return td;
   }
 
-  function makeDelta(delta){
-    const td = makeCalc(delta);
-    if(isNum(delta)){
-      const cls = qaClass(delta, state.meta.thresholds);
-      if(cls) td.classList.add(cls);
-    }
-    return td;
-  }
-
+  
   function makeCell(row, field, value, locked){
     const td = document.createElement('td');
     const editable = isEditableField(row, field) && !locked;
@@ -232,11 +214,11 @@
       return td;
     }
 
-    // numeric inputs (BS knownElev, BS, FS, GPS)
+    // numeric inputs
     const input = document.createElement('input');
-    input.type = 'text';            // keep as text for better control of minus/decimal
+    input.type = 'text';
     input.className = 'cell-input';
-    input.inputMode = 'decimal';    // mobile numeric keypad with decimal
+    input.inputMode = 'decimal';
     input.enterKeyHint = 'next';
     input.autocorrect = 'off';
     input.autocomplete = 'off';
@@ -258,7 +240,7 @@
 
   function isEditableField(row, field){
     if(field === 'station') return true;
-    if(row.type==='BS') return (field==='knownElev' || field==='bs');
+    if(row.type==='BS') return (field==='bs' || field==='knownElev'); // Elev cell acts as Known Elev
     if(row.type==='FS') return (field==='fs' || field==='gps');
     return false;
   }
@@ -305,7 +287,6 @@
   }
     catch(e){ return null; }
   }
-
   function hardReset(){
     if(confirm('Reset all data?')){
       localStorage.removeItem(STORAGE_KEY); location.reload();

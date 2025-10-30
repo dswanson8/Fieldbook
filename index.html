@@ -3,120 +3,90 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>Digital Field Book – QA/QC GPS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Field Book</title>
   <style>
     :root{
-      --bg:#0f172a;           /* slate-900 */
-      --card:#111827;         /* gray-900 */
-      --muted:#94a3b8;        /* slate-400 */
-      --text:#e5e7eb;         /* gray-200 */
-      --accent:#38bdf8;       /* sky-400 */
-      --accent-2:#22c55e;     /* green-500 */
-      --warn:#f59e0b;         /* amber-500 */
-      --bad:#ef4444;          /* red-500 */
-      --calc:#111827;         /* dark cell bg */
-      --calc-border:#1f2937;  /* dark border */
+      --bg:#ffffff; --card:#f9fafb; --muted:#4b5563; --text:#111827; --accent:#2563eb; --accent-2:#16a34a; --warn:#d97706; --bad:#dc2626; --calc:#f3f4f6; --calc-border:#e5e7eb; --border:#e5e7eb;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .wrap{max-width:1100px;margin:0 auto;padding:clamp(10px,3vw,24px)}
+    body{margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent;}
+    .wrap{max-width:900px;margin:0 auto;padding:clamp(8px,3vw,16px)}
 
-    header{
-      position:sticky; top:0; z-index:30;
-      background:linear-gradient(180deg, rgba(15,23,42,.98), rgba(15,23,42,.92));
-      backdrop-filter: blur(6px);
-      border-bottom:1px solid #1e293b;
-    }
-    .head{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px 0}
-    .titlebar{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    h1{font-size:clamp(16px,3.5vw,22px); margin:0; font-weight:700; letter-spacing:.2px}
-    .meta{display:flex; gap:10px; flex-wrap:wrap}
-    .meta input{min-width:140px}
+    header{position:sticky; top:0; z-index:30; background:rgba(255,255,255,.96); backdrop-filter:saturate(180%) blur(6px); border-bottom:1px solid var(--border)}
+    .head{display:grid; grid-template-columns: 1fr; gap:8px; padding:8px 0}
+    .status{justify-self:end}
+    .meta{display:grid; grid-template-columns: 1fr; gap:8px}
+    .meta input{width:100%}
 
-    .card{background:var(--card); border:1px solid #1f2937; border-radius:14px; padding:12px; box-shadow: 0 10px 20px rgba(0,0,0,.2)}
-    .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .toolbar .spacer{flex:1}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px}
 
-    button, .seg label{
-      appearance:none; border:1px solid #1f2937; background:#0b1220; color:var(--text);
-      padding:10px 12px; border-radius:10px; font-weight:600; font-size:14px;
-      letter-spacing:.2px; cursor:pointer; user-select:none;
-    }
-    button:active{transform:translateY(1px)}
-    button.primary{background:var(--accent); border-color:#0891b2; color:#001018}
-    button.ghost{background:transparent}
-    .seg{display:inline-flex; border:1px solid #1f2937; border-radius:10px; overflow:hidden}
+    .toolbar{display:grid; grid-template-columns: 1fr 1fr; gap:8px}
+    .toolbar .seg{grid-column: span 2}
+    .toolbar .wide{grid-column: span 2}
+    @media (min-width:560px){ .toolbar{grid-template-columns: repeat(4,1fr)} }
+
+    button, .seg label{appearance:none; border:1px solid var(--border); background:#ffffff; color:var(--text); padding:12px; border-radius:10px; font-weight:700; font-size:16px; letter-spacing:.2px; cursor:pointer; user-select:none}
+    button.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+    button.ghost{background:#fff}
+    .seg{display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden}
     .seg input{display:none}
-    .seg label{padding:8px 12px; border:0; background:#0b1220}
-    .seg input:checked + label{background:#083344; color:#7dd3fc}
+    .seg label{padding:10px 12px; border:0; background:#fff}
+    .seg input:checked + label{background:#eff6ff; color:#1d4ed8}
 
     .chips{display:flex; gap:8px; flex-wrap:wrap}
-    .chip{padding:8px 10px; border:1px solid #1f2937; border-radius:999px; font-size:12px; color:var(--muted)}
+    .chip{padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:var(--muted); background:#fff}
 
-    table{width:100%; border-collapse:separate; border-spacing:0; margin-top:10px}
-    thead th{
-      position:sticky; top:calc(56px + 12px); z-index:20;
-      background:#0b1220; color:var(--muted); font-weight:600; text-align:left;
-      border-bottom:1px solid #1f2937; padding:10px; font-size:12px;
-    }
-    tbody td{border-bottom:1px solid #1f2937; padding:8px 10px; font-size:14px; vertical-align:middle}
+    table{width:100%; border-collapse:separate; border-spacing:0; margin-top:8px; table-layout:fixed}
+    colgroup col.sta{width:20%}
+    colgroup col.small{width:16%}
+    thead th{position:sticky; top:96px; z-index:20; background:#fff; color:var(--muted); font-weight:700; text-align:left; border-bottom:1px solid var(--border); padding:8px; font-size:13px}
+    tbody td{border-bottom:1px solid var(--border); padding:6px 8px; font-size:16px; vertical-align:middle}
 
-    .cell-edit{background:#0b1220; border:1px dashed transparent; border-radius:8px; min-height:40px}
-    .cell-edit:focus-within{outline:0; border-color:#0ea5e9; box-shadow:0 0 0 2px rgba(56,189,248,.25)}
-    .cell-calc{background:var(--calc); color:#cbd5e1; border-radius:8px}
-    .cell-input{width:100%; background:transparent; border:0; color:var(--text); font:inherit; padding:8px 6px; outline:none}
-    .cell-input::placeholder{color:#64748b}
-    .cell-input:-webkit-autofill, .cell-input:-webkit-autofill:focus{transition:background-color 99999s ease-in-out 0s}
+    .cell-edit{background:#fff; border:1px solid var(--border); border-radius:8px; min-height:44px}
+    .cell-edit:focus-within{outline:0; border-color:#60a5fa; box-shadow:0 0 0 3px rgba(59,130,246,.25)}
+    .cell-calc{background:var(--calc); color:#111827; border-radius:8px; border:1px solid var(--calc-border)}
+    .cell-input{width:100%; background:transparent; border:0; color:var(--text); font:600 18px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding:10px 8px; outline:none}
+    .cell-input::placeholder{color:#9ca3af}
 
-    .pill{font-size:12px; padding:4px 8px; border-radius:999px; background:#0b1220; border:1px solid #1f2937}
-    .type-bs{color:#7dd3fc; border-color:#0ea5e9}
-    .type-fs{color:#a7f3d0; border-color:#10b981}
+    .qa-green{background:rgba(22,163,74,.1)!important; color:#166534!important}
+    .qa-yellow{background:rgba(234,179,8,.15)!important; color:#92400e!important}
+    .qa-red{background:rgba(220,38,38,.12)!important; color:#991b1b!important}
 
-    .qa-green{background:rgba(34,197,94,.15)!important; color:#86efac!important}
-    .qa-yellow{background:rgba(245,158,11,.15)!important; color:#fcd34d!important}
-    .qa-red{background:rgba(239,68,68,.15)!important; color:#fca5a5!important}
-
-    .footerbar{position:sticky; bottom:0; z-index:20; margin-top:12px}
+    .footerbar{position:sticky; bottom:0; z-index:20; margin-top:10px}
     .footerbar .card{display:flex; gap:10px; align-items:center; justify-content:space-between}
 
-    input, select{background:#0b1220; color:var(--text); border:1px solid #1f2937; border-radius:10px; padding:10px 12px}
-    input::placeholder{color:#64748b}
-
-    @media (hover:none){
-      button, .seg label, input, .cell-edit{padding:12px 14px}
-      tbody td{padding:10px 12px}
-    }
+    input, select{background:#fff; color:var(--text); border:1px solid var(--border); border-radius:10px; padding:12px}
+    input::placeholder{color:#9ca3af}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap head">
-      <div class="titlebar">
-        <h1>Digital Field Book — QA/QC GPS</h1>
-        <span class="chip" id="statusChip">Ready</span>
-      </div>
       <div class="meta">
         <input id="jobTitle" placeholder="Job Title" />
         <input id="jobDate" type="date" />
       </div>
+      <div class="status"><span class="chip" id="statusChip">Ready</span></div>
     </div>
   </header>
 
   <main class="wrap" id="app">
 
-    <div class="card" style="margin-bottom:12px">
+    <div class="card" style="margin-bottom:10px">
       <div class="toolbar">
         <button id="newSetupBtn" class="primary">+ New Setup</button>
         <button id="addBsBtn">+ Add BS</button>
         <button id="addFsBtn">+ Add FS</button>
-        <div class="spacer"></div>
+        <div class="seg wide" title="HI aggregator">
+          <input type="radio" name="agg" id="aggMedian" checked>
+          <label for="aggMedian">Median HI</label>
+          <input type="radio" name="agg" id="aggMean">
+          <label for="aggMean">Mean HI</label>
+        </div>
+        <button id="lockToggle" class="ghost wide" title="Lock/unlock current setup">🔒 Lock</button>
+      </div>
+    </div>
         <div class="seg" title="HI aggregator">
           <input type="radio" name="agg" id="aggMedian" checked>
           <label for="aggMedian">Median HI</label>
@@ -131,18 +101,22 @@
 
     <div class="card">
       <table id="grid">
+        <colgroup>
+          <col class="sta" />
+          <col class="small" />
+          <col class="small" />
+          <col class="small" />
+          <col class="small" />
+          <col class="small" />
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:70px">Type</th>
-            <th>Station</th>
-            <th>Known Elev (BS)</th>
-            <th>BS (m)</th>
-            <th>HI (m)</th>
-            <th>FS (m)</th>
-            <th>ELEV (m)</th>
-            <th>GPS (m)</th>
-            <th>Δ GPS (m)</th>
-            <th style="width:54px">Del</th>
+            <th>STA</th>
+            <th>BS</th>
+            <th>HI</th>
+            <th>FS</th>
+            <th>ELEV</th>
+            <th>GPS</th>
           </tr>
         </thead>
         <tbody id="gridBody"></tbody>
