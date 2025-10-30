@@ -1,311 +1,98 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Digital Field Book – QAQC GPS</title>
-  <style>
-    :root{--pad:8px;--radius:10px}
-    *{box-sizing:border-box}
-    body{margin:0;background:#f5f5f7;color:#111;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;font-size:15px}
-    header{padding:var(--pad)}
-    .wrap{max-width:1200px;margin:0 auto;padding:0 12px}
-    .card{background:#fff;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,0.08);padding:var(--pad);margin:var(--pad) auto}
-    input,button{font-size:15px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111;padding:6px 8px}
-    button{cursor:pointer;font-weight:600;transition:background 0.2s}
-    button.ghost{background:#f2f2f7}
-    button:hover{opacity:0.9}
-    .row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
-    .row>div{flex:1 1 140px}
-    .btnbar{display:flex;gap:6px}
-    .btnbar button{flex:1 1 0}
-    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:16px;margin-bottom:8px}
-    thead th{position:sticky;top:0;background:#f9f9f9;padding:6px}
-    th,td{border:1px solid #ddd;padding:8px 6px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    tbody tr:nth-child(even) td{background:#fbfbfd}
-    tr.selected td{outline:2px solid #0A84FF; outline-offset:-2px}
-    td.ro{background:#fafafa;font-weight:600}
-    td[contenteditable="true"]{background:#f0f8ff !important;outline:none}
-    .small{font-size:12px;opacity:.9}
-    .gps-green{color:#0a7a25;font-weight:600}
-    .gps-yellow{color:#cc8800;font-weight:600}
-    .gps-red{color:#b00020;font-weight:600}
-    .setup{margin-top:16px;padding:10px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);border-top-width:4px;border-top-style:solid}
-    .setup-1{border-top-color:#007aff}
-    .setup-2{border-top-color:#34c759}
-    .setup-3{border-top-color:#ff9500}
-    .setup-4{border-top-color:#ff3b30}
-    .setup h3{margin:0 0 8px;font-size:15px;font-weight:600}
-    .toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.qa-green{background:rgba(34,197,94,.15)!important; color:#86efac!important}
+.qa-yellow{background:rgba(245,158,11,.15)!important; color:#fcd34d!important}
+.qa-red{background:rgba(239,68,68,.15)!important; color:#fca5a5!important}
 
-    @media (max-width: 600px){
-      .wrap{max-width:100%}
-      .row{flex-direction:column; align-items:stretch}
-      .row>div{flex:1 1 auto; width:100%}
-      label{display:block; margin-bottom:4px; font-weight:600}
-      input{width:100%}
-      .btnbar{gap:4px}
-      table{font-size:13px}
-      th, td{padding:4px}
-      th:nth-child(1){width:50px}
-      th:nth-child(2){width:50px}
-      th:nth-child(3){width:60px}
-      th:nth-child(4){width:50px}
-      th:nth-child(5){width:70px}
-      th:nth-child(6){width:65px}
-    }
-    @media (min-width: 900px){
-      body{font-size:17px}
-      input,button{font-size:16px}
-      table{font-size:16px}
-    }
-  </style>
+
+.footerbar{position:sticky; bottom:0; z-index:20; margin-top:12px}
+.footerbar .card{display:flex; gap:10px; align-items:center; justify-content:space-between}
+
+
+input, select{background:#0b1220; color:var(--text); border:1px solid #1f2937; border-radius:10px; padding:10px 12px}
+input::placeholder{color:#64748b}
+
+
+@media (hover:none){
+button, .seg label, input, .cell-edit{padding:12px 14px}
+tbody td{padding:10px 12px}
+}
+</style>
 </head>
+
 <body>
-<div class="wrap">
-  <header class="card">
-    <div class="row">
-      <div><label>Job Title<br><input id="jobTitle" placeholder="Edgemont Stage 16" /></label></div>
-      <div><label>Date of Survey<br><input id="dateOfSurvey" type="date" /></label></div>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <div><label>Station<br><input id="station" placeholder="266" /></label></div>
-      <div><label>Elevation<br><input id="knownElev" type="number" step="0.001" placeholder="693.274" /></label></div>
-      <div class="btnbar">
-        <button id="addBs" class="ghost">Add BS</button>
-        <button id="addFs" class="ghost">Add FS</button>
-        <button id="newSetup" class="ghost">New Setup</button>
+  <header>
+    <div class="wrap head">
+      <div class="titlebar">
+        <h1>Digital Field Book — QA/QC GPS</h1>
+        <span class="chip" id="statusChip">Ready</span>
+      </div>
+      <div class="meta">
+        <input id="jobTitle" placeholder="Job Title" />
+        <input id="jobDate" type="date" />
       </div>
     </div>
   </header>
 
-  <div id="setups"></div>
 
-  <!-- Saved Jobs manager + Export/Import -->
-  <div id="jobsArea" class="card">
-    <div class="row" style="align-items:center">
-      <div style="flex:2 1 260px">
-        <label>Save snapshot as<br>
-          <input id="jobName" placeholder="e.g., Elderberry Landing – Aug 14" />
-        </label>
-        <div class="small">Snapshots are stored on this device.</div>
-      </div>
-      <div style="flex:0 0 auto; display:flex; gap:6px; align-items:center; flex-wrap:wrap">
-        <button id="saveJob" class="ghost">Save Snapshot</button>
-        <button id="exportCurrentCsv" class="ghost" title="Open in Excel/Sheets">Backup (Spreadsheet)</button>
-        <button id="exportCurrentJson" class="ghost" title="Perfect copy to restore later">Backup (Full)</button>
-        <button id="shareCurrentCsv" class="ghost" title="Share via phone apps">Share Backup</button>
-      </div>
-    </div>
-    <div class="row" style="align-items:center; margin-top:6px">
-      <div style="flex:1 1 auto">
-        <div id="jobsList" class="small">No saved snapshots yet.</div>
-      </div>
-      <div style="flex:0 0 auto; display:flex; gap:6px; align-items:center">
-        <input id="importFile" type="file" accept="application/json" />
-        <button id="importBtn" class="ghost" title="Restore a saved snapshot file">Restore from file</button>
+  <main class="wrap" id="app">
+
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="toolbar">
+        <button id="newSetupBtn" class="primary">+ New Setup</button>
+        <button id="addBsBtn">+ Add BS</button>
+        <button id="addFsBtn">+ Add FS</button>
+        <div class="spacer"></div>
+        <div class="seg" title="HI aggregator">
+          <input type="radio" name="agg" id="aggMedian" checked>
+          <label for="aggMedian">Median HI</label>
+          <input type="radio" name="agg" id="aggMean">
+          <label for="aggMean">Mean HI</label>
+        </div>
+        <button id="lockToggle" class="ghost" title="Lock/unlock current setup">🔒 Lock</button>
       </div>
     </div>
-    <div class="small">Spreadsheet = easy to open • Full = best for restore</div>
-  </div>
 
-  <!-- Reset area -->
-  <div id="resetArea" class="card" style="display:none">
-    <button id="resetJob" class="ghost" style="width:100%">Reset Job</button>
-    <div class="small">This clears the current job cache from this device. Saved snapshots remain.</div>
-  </div>
-</div>
 
-<script>
-(() => {
-  const JOBS_KEY = 'fieldBookJobs_v1';
-  const GPS_OK = 0.030, GPS_YEL = 0.040;
+    <div class="chips" id="setupTabs"></div>
 
-  let setupId = 0;
-  let setups = [];
-  let meta = { jobTitle:'', dateOfSurvey:'' };
-  let selected = { setupIndex:null, rowIndex:null };
 
-  const $ = id => document.getElementById(id);
-  const fmt = n => (n==null||isNaN(n) ? '' : Number(n).toFixed(3));
+    <div class="card">
+      <table id="grid">
+        <thead>
+          <tr>
+            <th style="width:70px">Type</th>
+            <th>Station</th>
+            <th>Known Elev (BS)</th>
+            <th>BS (m)</th>
+            <th>HI (m)</th>
+            <th>FS (m)</th>
+            <th>ELEV (m)</th>
+            <th>GPS (m)</th>
+            <th>Δ GPS (m)</th>
+            <th style="width:54px">Del</th>
+          </tr>
+        </thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+    </div>
 
-  // init date
-  $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
 
-  // load cache
-  if(localStorage.fieldBookData){
-    try {
-      const saved = JSON.parse(localStorage.fieldBookData);
-      setups = saved.setups||[];
-      meta = saved.meta || meta;
-      if(meta.jobTitle) $("jobTitle").value = meta.jobTitle;
-      if(meta.dateOfSurvey) $("dateOfSurvey").value = meta.dateOfSurvey;
-      setupId = setups.length;
-    }catch(e){}
-  }
+    <div class="footerbar">
+      <div class="card">
+        <div id="summary">Setups: 0 • BS: 0 • FS: 0 • G/Y/R: 0/0/0</div>
+        <div>
+          <button id="saveBtn">Save</button>
+          <button id="resetBtn" class="ghost">Reset</button>
+        </div>
+      </div>
+    </div>
 
-  // debounce saving
-  let saveTimer=null;
-  function saveCache(){
-    meta.jobTitle = $("jobTitle").value;
-    meta.dateOfSurvey = $("dateOfSurvey").value;
-    localStorage.fieldBookData = JSON.stringify({setups, meta});
-    $("resetArea").style.display = setups.some(s=>s.rows?.length>0) ? "block" : "none";
-  }
-  function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveCache, 250); }
 
-  function hiStats(rows){
-    const bsRows = rows.filter(r=>r.type==='BS' && !isNaN(r.hi));
-    if(bsRows.length===0) return {avg:null};
-    const his = bsRows.map(r=>r.hi);
-    return {avg:his.reduce((a,b)=>a+b,0)/his.length};
-  }
+  </main>
 
-  function gpsClass(diff){
-    if(isNaN(diff)) return '';
-    if(Math.abs(diff) <= GPS_OK) return 'gps-green';
-    if(Math.abs(diff) <= GPS_YEL) return 'gps-yellow';
-    return 'gps-red';
-  }
 
-  function sanitizeNumber(el){
-    let t=el.textContent; t=t.replace(/[^0-9.\-]/g,''); t=t.replace(/(\.)(?=.*\.)/g,''); t=t.replace(/(?!^)-/g,''); el.textContent=t; return t;
-  }
-
-  function render(){
-    const container = $("setups");
-    container.innerHTML = '';
-
-    setups.forEach((setup, si) => {
-      const s = hiStats(setup.rows||[]);
-      const sec = document.createElement('section');
-      sec.className = `card setup setup-${(si%4)+1}`;
-
-      const bar = document.createElement('div');
-      bar.className = 'toolbar';
-      const left = document.createElement('h3'); left.textContent = `Setup ${si+1} • HI avg: ${fmt(s.avg)}`;
-      bar.appendChild(left);
-      const delBtn = document.createElement('button'); delBtn.className='ghost'; delBtn.textContent='Delete selected row';
-      delBtn.onclick = () => deleteSelectedRow(si);
-      bar.appendChild(delBtn);
-      sec.appendChild(bar);
-
-      const table = document.createElement('table');
-      table.innerHTML = `<thead><tr><th>ST</th><th>BS</th><th>HI</th><th>FS</th><th>ELEV</th><th>GPS</th></tr></thead>`;
-      const tbody = document.createElement('tbody');
-
-      (setup.rows||[]).forEach((r, ri) => {
-        const tr = document.createElement('tr');
-
-        const tdSt = document.createElement('td');
-        tdSt.contentEditable = true; tdSt.textContent = r.station||'';
-        tdSt.oninput = ()=>{ r.station = tdSt.textContent.trim(); scheduleSave(); };
-
-        const tdBs = document.createElement('td');
-        if(r.type==='BS'){
-          tdBs.contentEditable=true; tdBs.textContent=fmt(r.bs);
-          tdBs.oninput=()=>{ sanitizeNumber(tdBs); r.bs=parseFloat(tdBs.textContent); r.hi=(!isNaN(r.bs)&&!isNaN(r.knownElev))?(r.knownElev+r.bs):null; tdHi.textContent=fmt(r.hi); left.textContent = `Setup ${si+1} • HI avg: ${fmt(hiStats(setup.rows).avg)}`; scheduleSave(); };
-          tdBs.onblur=()=>{ if(!isNaN(r.bs)) tdBs.textContent=fmt(r.bs); };
-        }
-
-        const tdHi=document.createElement('td'); tdHi.className='ro'; tdHi.textContent=fmt(r.hi);
-
-        const tdFs=document.createElement('td');
-        if(r.type==='FS'){
-          tdFs.contentEditable=true; tdFs.textContent=fmt(r.fs);
-          tdFs.oninput=()=>{ sanitizeNumber(tdFs); r.fs=parseFloat(tdFs.textContent); const stats=hiStats(setup.rows); r.elev=(!isNaN(r.fs)&&!isNaN(stats.avg))?(stats.avg-r.fs):r.elev; tdElev.textContent=fmt(r.elev); scheduleSave(); };
-          tdFs.onblur=()=>{ if(!isNaN(r.fs)) tdFs.textContent=fmt(r.fs); };
-        }
-
-        const tdElev=document.createElement('td'); tdElev.className='ro'; tdElev.textContent=fmt(r.elev);
-
-        const tdGps=document.createElement('td'); tdGps.contentEditable=true; tdGps.textContent=fmt(r.gps);
-        function updateGps(){ const diff=(!isNaN(r.gps)&&!isNaN(r.elev))?Math.abs(r.gps-r.elev):NaN; tdGps.className=gpsClass(diff); }
-        tdGps.oninput=()=>{ sanitizeNumber(tdGps); r.gps=parseFloat(tdGps.textContent); updateGps(); scheduleSave(); };
-        tdGps.onblur=()=>{ if(!isNaN(r.gps)) tdGps.textContent=fmt(r.gps); };
-        updateGps();
-
-        // row click for selection (without interfering with editing)
-        tr.onclick = (e)=>{
-          if(e.target.isContentEditable) return; // don’t select when editing
-          document.querySelectorAll('tr.selected').forEach(el=>el.classList.remove('selected'));
-          tr.classList.add('selected');
-          selected = { setupIndex: si, rowIndex: ri };
-        };
-
-        tr.append(tdSt,tdBs,tdHi,tdFs,tdElev,tdGps);
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-      sec.appendChild(table);
-
-      const legend = document.createElement('div'); legend.className='small'; legend.innerHTML = 'GPS QA: <span class="gps-green">≤ 0.030 m</span> • <span class="gps-yellow">≤ 0.040 m</span> • <span class="gps-red">&gt; 0.040 m</span>';
-      sec.appendChild(legend);
-
-      container.appendChild(sec);
-    });
-
-    saveCache();
-  }
-
-  function deleteSelectedRow(forSetup){
-    if(selected.setupIndex!==forSetup){ alert('Select a row in this setup first.'); return; }
-    const s = setups[forSetup]; if(!s){ return; }
-    if(typeof selected.rowIndex !== 'number'){ alert('No row selected.'); return; }
-    if(!confirm('Delete the selected row?')) return;
-    s.rows.splice(selected.rowIndex,1);
-    selected = { setupIndex:null, rowIndex:null };
-    render();
-  }
-
-  // ---- Buttons ----
-  $("addBs").onclick=()=>{
-    const st=$("station").value.trim();
-    const known=parseFloat($("knownElev").value);
-    if(!st){alert('Enter Station');return}
-    if(setups.length===0){ setupId=1; setups.push({rows:[]}); }
-    const setup=setups[setupId-1];
-    setup.rows.push({station:st,type:'BS',knownElev:isNaN(known)?null:known,bs:null,hi:null,fs:null,elev:known||null,gps:null});
-    $("station").value='';$("knownElev").value='';
-    render();
-  };
-
-  $("addFs").onclick=()=>{
-    const st=$("station").value.trim();
-    if(!st){alert('Enter Station');return}
-    if(setups.length===0){ setupId=1; setups.push({rows:[]}); }
-    const setup=setups[setupId-1];
-    setup.rows.push({station:st,type:'FS',bs:null,hi:null,fs:null,elev:null,gps:null});
-    $("station").value='';
-    render();
-  };
-
-  $("newSetup").onclick=()=>{
-    if(setups.length===0){ setupId=1; setups.push({rows:[]}); render(); return; }
-    if(confirm('Create a new setup and lock the previous one?')){
-      setupId+=1; setups.push({rows:[]}); render();
-    }
-  };
-
-  $("resetJob").onclick=()=>{
-    if(localStorage.fieldBookData && confirm('Resetting will clear the CURRENT job cache. Saved snapshots remain. Continue?')){
-      delete localStorage.fieldBookData;
-      setups = [];
-      setupId = 0;
-      meta = { jobTitle:'', dateOfSurvey:'' };
-      selected = { setupIndex:null, rowIndex:null };
-      $("jobTitle").value = '';
-      $("dateOfSurvey").valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
-      $("station").value = '';
-      $("knownElev").value = '';
-      render();
-    }
-  };
-
-  // initial render
-  render();
-})();
-</script>
+  <script src="app.js"></script>
 </body>
+
 </html>
