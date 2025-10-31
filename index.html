@@ -17,7 +17,11 @@
   <main class="wrap" id="app">
     <div class="card">
       <div class="toolbar">
-        <button id="newSetupBtn" class="primary">+ New Setup</button> <button id="addBsBtn">+ Add BS</button> <button id="addFsBtn">+ Add FS</button>
+        <button id="newSetupBtn" class="primary">+ New Setup</button>
+        <div class="addBtn">
+          <button id="addBsBtn">+ Add BS</button> 
+          <button id="addFsBtn">+ Add FS</button>
+        </div>
         <div class="seg wide" title="HI aggregator">
           <input type="radio" name="agg" id="aggMedian" checked> <label for="aggMedian">Median HI</label> <input type="radio" name="agg" id="aggMean"> <label for="aggMean">Mean HI</label>
         </div><button id="lockToggle" class="ghost wide" title="Lock/unlock current setup">🔒 Lock</button>
@@ -52,8 +56,9 @@
         <div id="summary">
           Setups: 0 • BS: 0 • FS: 0 • G/Y/R: 0/0/0
         </div>
-        <div>
-          <button id="saveBtn">Save</button> <button id="resetBtn" class="ghost">Reset</button>
+        <div class="addBtn">
+          <button id="saveBtn">Save</button>
+          <button id="resetBtn" class="ghost">Reset</button>
         </div>
       </div>
     </div>

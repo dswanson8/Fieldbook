@@ -84,6 +84,11 @@ header {
     }
 }
 
+.addBtn {
+    display: flex;
+    gap: 10px;
+}
+
 button,
 .seg label {
     appearance: none;
@@ -131,7 +136,7 @@ button.ghost {
 }
 
 .seg input:checked+label {
-    background: #eff6ff;
+    background: #9cc7ff;
     color: #1d4ed8
 }
 

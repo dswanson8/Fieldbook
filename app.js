@@ -51,15 +51,28 @@
     els.btnSave.addEventListener('click', () => { saveState(true); flash('Saved'); });
     els.btnReset.addEventListener('click', hardReset);
 
-    els.aggMedian.addEventListener('change', () => { state.settings.useMedian = true; recomputeActive(); render(); saveState(); });
-    els.aggMean.addEventListener('change', () => { state.settings.useMedian = false; recomputeActive(); render(); saveState(); });
+    els.aggMedian.addEventListener('change', () => {
+        const s = activeSetup();
+        s.useMedian = true;
+        recompute(s);
+        render();
+        saveState();
+    });
+
+    els.aggMean.addEventListener('change', () => {
+        const s = activeSetup();
+        s.useMedian = false;
+        recompute(s);
+        render();
+        saveState();
+    });
 
     if (state.setups.length === 0) addSetup();
     render();
 
     // --- Core
     function addSetup() {
-        state.setups.push({ locked: false, rows: [] });
+        state.setups.push({ locked: false, rows: [], useMedian: true });
         state.active = state.setups.length - 1;
     }
     function activeSetup() { return state.setups[state.active]; }
@@ -97,7 +110,8 @@
         });
         // aggregate HI
         const his = setup.rows.filter(r => r.type === 'BS' && isNum(r.hi)).map(r => r.hi);
-        const hiAgg = his.length ? (state.settings.useMedian ? median(his) : mean(his)) : null;
+        const hiAgg = his.length ? (setup.useMedian ? median(his) : mean(his)) : null;
+
 
         // FS elev + delta
         setup.rows.forEach(r => {
@@ -127,6 +141,8 @@
         // table
         els.gridBody.innerHTML = '';
         const s = activeSetup();
+        els.aggMedian.checked = !!s.useMedian;
+        els.aggMean.checked = !s.useMedian;
 
         s.rows.forEach((r, idx) => {
             const tr = document.createElement('tr');
