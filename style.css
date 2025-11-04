@@ -280,3 +280,13 @@ input::placeholder {
     color: #111;
     font-weight: 700;
 }
+
+.hi-active {
+    background: #dcfce7;
+    /* light green */
+    color: #166534;
+    /* dark green text */
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+}

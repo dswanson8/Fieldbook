@@ -21,8 +21,10 @@
         btnAddBs: byId('addBsBtn'),
         btnAddFs: byId('addFsBtn'),
         btnLock: byId('lockToggle'),
-        btnSave: byId('saveBtn'),
+        // btnSave: byId('saveBtn'),
+        btnExportAll: byId('exportAllBtn'),
         btnReset: byId('resetBtn'),
+        // btnExport: byId('exportPrintBtn'),
         aggMedian: byId('aggMedian'),
         aggMean: byId('aggMean'),
         summary: byId('summary'),
@@ -48,8 +50,11 @@
     els.btnAddBs.addEventListener('click', () => { addRow('BS'); render(); saveState(); });
     els.btnAddFs.addEventListener('click', () => { addRow('FS'); render(); saveState(); });
     els.btnLock.addEventListener('click', () => { toggleLock(); render(); saveState(); });
-    els.btnSave.addEventListener('click', () => { saveState(true); flash('Saved'); });
+    // els.btnSave.addEventListener('click', () => { saveState(true); flash('Saved'); });
+    els.btnExportAll.addEventListener('click', exportAllPrintable);
     els.btnReset.addEventListener('click', hardReset);
+    // els.btnExport.addEventListener('click', exportPrintable);
+
 
     els.aggMedian.addEventListener('change', () => {
         const s = activeSetup();
@@ -297,18 +302,117 @@
     }
 
     function updateSummary() {
-        let summaryLines = state.setups.map((s, i) => {
+        const lines = state.setups.map((s, i) => {
             const bsRows = s.rows.filter(r => r.type === 'BS');
             const his = bsRows.filter(r => isNum(r.hi)).map(r => r.hi);
             const med = his.length ? median(his) : null;
             const avg = his.length ? mean(his) : null;
 
-            return `Setup ${i + 1} • BS: <b>${bsRows.length}</b> • Median HI: <b>${isNum(med) ? num3(med) : '—'}</b> • Mean HI: <b>${isNum(avg) ? num3(avg) : '—'}</b>`;
+            const medPart = s.useMedian
+                ? `<span class="hi-active">Median HI: <b>${isNum(med) ? num3(med) : '—'}</b></span>`
+                : `Median HI: <b>${isNum(med) ? num3(med) : '—'}</b>`;
+
+            const avgPart = !s.useMedian
+                ? `<span class="hi-active">Mean HI: <b>${isNum(avg) ? num3(avg) : '—'}</b></span>`
+                : `Mean HI: <b>${isNum(avg) ? num3(avg) : '—'}</b>`;
+
+            return `Setup ${i + 1} • BS: <b>${bsRows.length}</b> • ${medPart} • ${avgPart}`;
         });
 
-        els.summary.innerHTML = summaryLines.join('<br>');
+        els.summary.innerHTML = lines.join('<br>');
     }
 
+    // --- helpers ---
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, m => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]
+        ));
+    }
+
+    function exportAllPrintable() {
+        const thr = state.meta.thresholds;
+        const title = state.meta.title || 'Field Book';
+        const date = state.meta.date || todayISO();
+        const fmt = v => isNum(v) ? num3(v) : '—';
+
+        // Build one printable HTML with a section per setup (page break between)
+        const sections = state.setups.map((s, i) => {
+            // HI summary for this setup
+            const his = s.rows.filter(r => r.type === 'BS' && isNum(r.hi)).map(r => r.hi);
+            const med = his.length ? median(his) : null;
+            const avg = his.length ? mean(his) : null;
+            const mode = s.useMedian ? 'Median' : 'Mean';
+
+            // Table rows
+            const rowsHtml = s.rows.map(r => {
+                const tds = [];
+                tds.push(`<td>${escapeHtml(r.station ?? '')}</td>`);
+                tds.push(`<td>${r.type === 'BS' ? fmt(r.bs) : '—'}</td>`);
+                tds.push(`<td>${r.type === 'BS' ? fmt(r.hi) : '—'}</td>`);
+                tds.push(`<td>${r.type === 'FS' ? fmt(r.fs) : '—'}</td>`);
+                tds.push(`<td>${r.type === 'BS' ? fmt(r.knownElev) : (r.type === 'FS' ? fmt(r.elev) : '—')}</td>`);
+
+                // GPS with Δ-based coloring (only for FS rows)
+                let gpsHtml = r.type === 'FS' ? fmt(r.gps) : '—';
+                let cellStyle = '';
+                if (r.type === 'FS' && isNum(r.delta)) {
+                    cellStyle =
+                        r.delta <= thr.green ? ' style="background:#dcfce7"' :   /* green-100 */
+                            r.delta <= thr.yellow ? ' style="background:#fef3c7"' :   /* amber-100 */
+                                ' style="background:#fee2e2"';    /* red-100   */
+                }
+                tds.push(`<td${cellStyle}>${gpsHtml}</td>`);
+                return `<tr>${tds.join('')}</tr>`;
+            }).join('');
+
+            return `
+            <section class="page">
+                <h2>${escapeHtml(title)} — Setup ${i + 1}</h2>
+                <div class="meta">
+                <div><b>Date:</b> ${escapeHtml(date)}</div>
+                <div><b>HI Mode:</b> ${mode}
+                    &nbsp; <b>Median HI:</b> ${isNum(med) ? num3(med) : '—'}
+                    &nbsp; <b>Mean HI:</b> ${isNum(avg) ? num3(avg) : '—'}</div>
+                <div class="muted">GPS Δ thresholds: green ≤ ${num3(thr.green)} • yellow ≤ ${num3(thr.yellow)}</div>
+                </div>
+                <table>
+                <thead><tr><th>STA</th><th>BS</th><th>HI</th><th>FS</th><th>ELEV</th><th>GPS</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+                </table>
+            </section>`;
+        }).join('');
+
+        const html = `<!doctype html><html><head><meta charset="utf-8">
+        <title>${escapeHtml(title)} — All Setups</title>
+        <style>
+            body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111;margin:24px;}
+            h1,h2{margin:0 0 6px;}
+            h2{font-size:18px;}
+            .meta{margin:0 0 12px;color:#444}
+            .muted{color:#555}
+            table{width:100%;border-collapse:collapse;font-size:14px}
+            th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}
+            th{background:#f3f4f6}
+            .page{margin-bottom:24px;}
+            @media print{
+            body{margin:0.5in;}
+            .page{page-break-after: always;}
+            .page:last-of-type{page-break-after: auto;}
+            button{display:none}
+            }
+        </style>
+        </head>
+        <body>
+            <h1>${escapeHtml(title)} — All Setups</h1>
+            ${sections}
+            <button onclick="window.print()">Print / Save as PDF</button>
+        </body></html>`;
+
+        const win = window.open('', '_blank');
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+    }
 
 
     // --- Storage
@@ -360,4 +464,5 @@
     }
     function setStatus(msg) { els.status.textContent = msg; setTimeout(() => { els.status.textContent = 'Ready'; }, 1200); }
     function flash(msg) { setStatus(msg); }
+
 })();
