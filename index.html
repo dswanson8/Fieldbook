@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Field Book</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
+
 <body>
   <header>
     <div class="wrap head">
@@ -19,11 +21,12 @@
       <div class="toolbar">
         <button id="newSetupBtn" class="primary">+ New Setup</button>
         <div class="addBtn">
-          <button id="addBsBtn">+ Add BS</button> 
+          <button id="addBsBtn">+ Add BS</button>
           <button id="addFsBtn">+ Add FS</button>
         </div>
         <div class="seg wide" title="HI aggregator">
-          <input type="radio" name="agg" id="aggMedian" checked> <label for="aggMedian">Median HI</label> <input type="radio" name="agg" id="aggMean"> <label for="aggMean">Mean HI</label>
+          <input type="radio" name="agg" id="aggMedian" checked> <label for="aggMedian">Median HI</label> <input
+            type="radio" name="agg" id="aggMean"> <label for="aggMean">Mean HI</label>
         </div><button id="lockToggle" class="ghost wide" title="Lock/unlock current setup">🔒 Lock</button>
       </div>
     </div>
@@ -59,10 +62,41 @@
         <div class="addBtn">
           <button id="exportAllBtn">Export All (PDF/Print)</button>
           <button id="resetBtn" class="ghost">Reset</button>
+          <button id="toolsBtn" class="ghost wide">Slope</button>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- Tools Flyout (bottom sheet) -->
+  <div id="toolsSheet" class="sheet hidden" aria-hidden="true">
+    <div class="sheet-backdrop" id="toolsBackdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-labelledby="toolsTitle">
+      <div class="sheet-header">
+        <button id="toolsClose" class="ghost">✕</button>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-title">Slope Checker</div>
+        <div class="tool-grid">
+          <input id="scStartSta" placeholder="Start Station (opt.)" inputmode="text">
+          <input id="scEndSta" placeholder="End Station (opt.)" inputmode="text">
+          <input id="scDStart" placeholder="Design Elev @ Start" inputmode="decimal">
+          <input id="scDEnd" placeholder="Design Elev @ End" inputmode="decimal">
+          <input id="scAStart" placeholder="ASB Elev @ Start" inputmode="decimal">
+          <input id="scAEnd" placeholder="ASB Elev @ End" inputmode="decimal">
+          <input id="scLen" placeholder="Segment Length (m)" inputmode="decimal">
+        </div>
+        <div id="scResults" class="tool-results"></div>
+        <div class="tool-actions">
+          <button id="scCompute" class="primary">Compute</button>
+          <button id="scClear" class="ghost">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js?v=2025-10-30-2"></script>
 </body>
+
 </html>

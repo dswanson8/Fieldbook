@@ -11,6 +11,7 @@
 (function () {
     const APP_VERSION = '2025.10.30-4';
     const STORAGE_KEY = 'dfb_v3_state';
+    const SLOPE_STORAGE_KEY = 'dfb_slopecalc_v1';
 
     const els = {
         title: byId('jobTitle'),
@@ -28,6 +29,24 @@
         aggMedian: byId('aggMedian'),
         aggMean: byId('aggMean'),
         summary: byId('summary'),
+
+        // --- Tools Flyout ---
+        toolsBtn: byId('toolsBtn'),
+        toolsSheet: byId('toolsSheet'),
+        toolsBackdrop: byId('toolsBackdrop'),
+        toolsClose: byId('toolsClose'),
+
+        // --- Slope Checker Fields ---
+        scStartSta: byId('scStartSta'),
+        scEndSta: byId('scEndSta'),
+        scDStart: byId('scDStart'),
+        scDEnd: byId('scDEnd'),
+        scAStart: byId('scAStart'),
+        scAEnd: byId('scAEnd'),
+        scLen: byId('scLen'),
+        scResults: byId('scResults'),
+        scCompute: byId('scCompute'),
+        scClear: byId('scClear'),
     };
 
     const state = loadState() || {
@@ -54,6 +73,15 @@
     els.btnExportAll.addEventListener('click', exportAllPrintable);
     els.btnReset.addEventListener('click', hardReset);
     // els.btnExport.addEventListener('click', exportPrintable);
+
+    // --- Tools Flyout ---
+    els.toolsBtn?.addEventListener('click', openTools);
+    els.toolsBackdrop?.addEventListener('click', closeTools);
+    els.toolsClose?.addEventListener('click', closeTools);
+
+    // --- Slope Checker actions (placeholder for now) ---
+    els.scCompute?.addEventListener('click', computeSlopeCheck);
+    els.scClear?.addEventListener('click', clearSlopeCheck);
 
 
     els.aggMedian.addEventListener('change', () => {
@@ -443,6 +471,142 @@
         }
     }
 
+    // --- Tools Flyout Control ---
+    function openTools() {
+        const sheet = els.toolsSheet;
+        if (!sheet) { console.warn('Tools sheet not found in HTML'); return; }
+        sheet.classList.remove('hidden');
+        sheet.setAttribute('aria-hidden', 'false');
+
+        // Restore last computed inputs (if any) and show results
+        try {
+            const raw = localStorage.getItem(SLOPE_STORAGE_KEY);
+            if (raw) {
+                const s = JSON.parse(raw);
+                if (s) {
+                    if (els.scDStart) els.scDStart.value = s.dStart ?? '';
+                    if (els.scDEnd) els.scDEnd.value = s.dEnd ?? '';
+                    if (els.scAStart) els.scAStart.value = s.aStart ?? '';
+                    if (els.scAEnd) els.scAEnd.value = s.aEnd ?? '';
+                    if (els.scLen) els.scLen.value = s.len ?? '';
+                    if (els.scStartSta) els.scStartSta.value = s.startSta ?? '';
+                    if (els.scEndSta) els.scEndSta.value = s.endSta ?? '';
+                    computeSlopeCheck(); // render results immediately
+                }
+            }
+        } catch (e) { console.warn('Slope calc restore failed', e); }
+    }
+
+    function closeTools() {
+        const sheet = els.toolsSheet;
+        if (!sheet) { console.warn('Tools sheet not found in HTML'); return; }
+        sheet.classList.add('hidden');
+        sheet.setAttribute('aria-hidden', 'true');
+    }
+
+
+    // Helpers for the slope checker
+    function mmToMeters(raw) {
+        const str = String(raw ?? '').trim();
+        const v = sanitizeNumber(str);
+        if (v === null) return null;
+        // Elevations: allow mm shorthand (no decimal/comma => divide by 1000)
+        return /[.,]/.test(str) ? v : v / 1000;
+    }
+    function fmtRatioFromPercent(pct) {
+        if (!isNum(pct) || pct === 0) return '—';
+        const r = Math.round(100 / Math.abs(pct)); // 1 in X (integer)
+        return `1 in ${r}`;
+    }
+
+    // Replace your placeholder with this:
+    function computeSlopeCheck() {
+        // Read inputs
+        const dStart = mmToMeters(els.scDStart.value);
+        const dEnd = mmToMeters(els.scDEnd.value);
+        const aStart = mmToMeters(els.scAStart.value);
+        const aEnd = mmToMeters(els.scAEnd.value);
+
+        // Length is in meters (no mm auto-convert here)
+        const lenRaw = String(els.scLen.value ?? '').trim();
+        const len = sanitizeNumber(lenRaw); // meters
+
+        // Compute slopes: % = ((start - end) / length) * 100
+        // const dPct = (isNum(dStart) && isNum(dEnd) && isNum(len) && len !== 0)
+        //     ? ((dStart - dEnd) / len) * 100 : null;
+        // const aPct = (isNum(aStart) && isNum(aEnd) && isNum(len) && len !== 0)
+        //     ? ((aStart - aEnd) / len) * 100 : null;
+
+        // Compute slopes: POSITIVE when Top > Bottom (design convention)
+        const dPct = (isNum(dStart) && isNum(dEnd) && isNum(len) && len !== 0)
+            ? ((dEnd - dStart) / len) * 100   // Design: Top - Bottom
+            : null;
+
+        const aPct = (isNum(aStart) && isNum(aEnd) && isNum(len) && len !== 0)
+            ? ((aEnd - aStart) / len) * 100   // ASB: Top - Bottom
+            : null;
+
+
+        const dPctTxt = isNum(dPct) ? `${num3(dPct)}%` : '—';
+        const aPctTxt = isNum(aPct) ? `${num3(aPct)}%` : '—';
+
+        const dRatio = fmtRatioFromPercent(dPct);
+        const aRatio = fmtRatioFromPercent(aPct);
+
+        // Deltas
+        const deltaPct = (isNum(dPct) && isNum(aPct)) ? (aPct - dPct) : null; // ASB - Design
+        const deltaEnd = (isNum(aEnd) && isNum(dEnd)) ? (aEnd - dEnd) : null;  // ASB end vs Design end
+
+        const deltaStart = (isNum(aStart) && isNum(dStart)) ? (aStart - dStart) : null;
+
+        const thr = { green: 0.05, yellow: 0.10 }; // % thresholds you requested
+        let deltaClass = '';
+        if (isNum(deltaPct)) {
+            deltaClass = Math.abs(deltaPct) <= thr.green ? 'qa-green'
+                : Math.abs(deltaPct) <= thr.yellow ? 'qa-yellow'
+                    : 'qa-red';
+        }
+
+        const deltaPctTxt = isNum(deltaPct) ? `${num3(deltaPct)}%` : '—';
+        const deltaEndTxt = isNum(deltaEnd) ? `${num3(deltaEnd)} m` : '—';
+
+        // Render results
+        els.scResults.innerHTML = `
+            <div><b>Design Slope:</b> ${dPctTxt} &nbsp; <span class="muted">(${dRatio})</span></div>
+            <div><b>ASB Slope:</b> ${aPctTxt} &nbsp; <span class="muted">(${aRatio})</span></div>
+            <div><b>Δ Slope:</b> <span class="${deltaClass}">${deltaPctTxt}</span></div>
+            <div><b>Δ Start:</b> ${isNum(deltaStart) ? deltaMmText(aStart, dStart) : '—'}</div>
+            <div><b>Δ End:</b> ${isNum(deltaEnd) ? deltaMmText(aEnd, dEnd) : '—'}</div>
+            `;
+
+        // Persist inputs so the last computed calc survives refresh
+        try {
+            localStorage.setItem(SLOPE_STORAGE_KEY, JSON.stringify({
+                dStart, dEnd, aStart, aEnd, len,
+                startSta: els.scStartSta?.value ?? '',
+                endSta: els.scEndSta?.value ?? ''
+            }));
+        } catch (e) { console.warn('Slope calc save failed', e); }
+
+
+    }
+
+    function clearSlopeCheck() {
+        [
+            els.scStartSta, els.scEndSta,
+            els.scDStart, els.scDEnd,
+            els.scAStart, els.scAEnd,
+            els.scLen
+        ].forEach(i => i && (i.value = ''));
+
+        // Clear results UI
+        els.scResults.innerHTML = '';
+
+        // Remove persisted calc
+        try { localStorage.removeItem(SLOPE_STORAGE_KEY); } catch (e) { }
+    }
+
+
     // --- Utils
     function byId(id) { return document.getElementById(id); }
     function todayISO() { return new Date().toISOString().slice(0, 10); }
@@ -464,5 +628,22 @@
     }
     function setStatus(msg) { els.status.textContent = msg; setTimeout(() => { els.status.textContent = 'Ready'; }, 1200); }
     function flash(msg) { setStatus(msg); }
+
+    // function deltaMmText(asb, design) {
+    //     if (!isNum(asb) || !isNum(design)) return '—';
+    //     const mm = Math.round((asb - design) * 1000); // + = HIGH, - = LOW
+    //     if (mm === 0) return '0 mm OK';
+    //     return `${Math.abs(mm)} mm ${mm > 0 ? '<br class="text-small">HIGH</b>' : '<b class="text-small">LOW</b>'}`;
+    // }
+
+    function deltaMmText(asb, design) {
+        if (!isNum(asb) || !isNum(design)) return '—';
+        const mm = Math.round((asb - design) * 1000); // + = HIGH (asb above design)
+        if (mm === 0) return `<span class="delta-zero">0 mm OK</span>`;
+        const cls = mm > 0 ? 'delta-up' : 'delta-down';
+        const arrow = mm > 0 ? '▲' : '▼';
+        return `<span class="${cls}">${Math.abs(mm)} mm ${arrow}</span>`;
+    }
+
 
 })();
