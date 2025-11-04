@@ -9,7 +9,7 @@
   - localStorage with version bust
 */
 (function () {
-    const APP_VERSION = '2025.10.30-4';
+    const APP_VERSION = '2025-11-04';
     const STORAGE_KEY = 'dfb_v3_state';
     const SLOPE_STORAGE_KEY = 'dfb_slopecalc_v1';
 
