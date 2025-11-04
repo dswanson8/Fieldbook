@@ -31,6 +31,10 @@
       </div>
     </div>
     <div class="chips" id="setupTabs"></div>
+    <!-- Shows only when active setup > 0 -->
+    <div id="existingBsBar" class="hidden" style="margin-bottom:10px;">
+      <button id="addExistingBsBtn" class="chip">+ Add Existing BS</button>
+    </div>
     <div class="card">
       <table id="grid">
         <colgroup>
@@ -95,6 +99,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Existing BS Picker (bottom sheet) -->
+  <div id="bsPickerSheet" class="sheet hidden" aria-hidden="true">
+    <div class="sheet-backdrop" id="bsPickerBackdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-labelledby="bsPickerTitle">
+      <div class="sheet-header">
+        <div id="bsPickerTitle">Add Existing BS</div>
+        <button id="bsPickerClose" class="ghost">✕</button>
+      </div>
+
+      <div id="bsPickerList" style=""></div>
+
+    </div>
+  </div>
+
 
   <script src="app.js?v=2025-10-30-2"></script>
 </body>

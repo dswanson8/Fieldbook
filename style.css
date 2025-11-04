@@ -180,6 +180,46 @@ button.ghost {
     background: #fff;
 }
 
+#addExistingBsBtn {
+    margin: 0;
+    background-color: skyblue;
+}
+
+#bsPickerClose {
+    display: block;
+    width: auto;
+}
+
+.bs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px
+}
+
+@media (max-width:420px) {
+    .bs-grid {
+        grid-template-columns: repeat(2, 1fr)
+    }
+}
+
+.bs-btn {
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-weight: 700;
+    text-align: left
+}
+
+.bs-btn .bs-meta {
+    display: block;
+    color: #6b7280;
+    font-weight: 400;
+    font-size: 12px;
+    margin-top: 4px
+}
+
+
 .chip button {
     width: min-content;
 }
@@ -313,6 +353,10 @@ input::placeholder {
     padding: 2px 6px;
     border-radius: 6px;
     font-weight: 700;
+}
+
+.hidden {
+    display: none;
 }
 
 /* Bottom sheet */

@@ -47,7 +47,52 @@
         scResults: byId('scResults'),
         scCompute: byId('scCompute'),
         scClear: byId('scClear'),
+
+        // --- Existing BS Picker ---
+        existingBsBar: byId('existingBsBar'),
+        btnAddExistingBs: byId('addExistingBsBtn'),
+        bsPickerSheet: byId('bsPickerSheet'),
+        bsPickerBackdrop: byId('bsPickerBackdrop'),
+        bsPickerClose: byId('bsPickerClose'),
+        bsPickerList: byId('bsPickerList'),
+        bsPickerUse: byId('bsPickerUse'),
+        bsPickerCancel: byId('bsPickerCancel'),
+
     };
+
+    function toast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = `
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            text-align: center;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        `;
+        document.body.appendChild(t);
+
+        requestAnimationFrame(() => {
+            t.style.opacity = 1;
+            t.style.transform = 'translateX(-50%) translateY(-4px)';
+        });
+
+        setTimeout(() => {
+            t.style.opacity = 0;
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => t.remove(), 200);
+        }, 1400);
+    }
+
 
     const state = loadState() || {
         meta: { title: '', date: todayISO(), thresholds: { green: 0.030, yellow: 0.040 }, appVersion: APP_VERSION },
@@ -82,6 +127,23 @@
     // --- Slope Checker actions (placeholder for now) ---
     els.scCompute?.addEventListener('click', computeSlopeCheck);
     els.scClear?.addEventListener('click', clearSlopeCheck);
+
+    // Open picker
+    els.btnAddExistingBs?.addEventListener('click', openBsPicker);
+
+    // Close picker
+    els.bsPickerBackdrop?.addEventListener('click', closeBsPicker);
+    els.bsPickerClose?.addEventListener('click', closeBsPicker);
+    els.bsPickerCancel?.addEventListener('click', closeBsPicker);
+
+    // Confirm/Insert
+    // els.bsPickerUse?.addEventListener('click', insertBsFromPicker);
+
+    els.bsPickerList?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.bs-btn');
+        if (!btn) return;
+        insertBsFromData(btn.dataset.station, sanitizeNumber(btn.dataset.elev));
+    });
 
 
     els.aggMedian.addEventListener('change', () => {
@@ -167,6 +229,15 @@
             b.addEventListener('click', () => { state.active = i; render(); saveState(); });
             els.tabs.appendChild(b);
         });
+
+        // Show the bar only when not on Setup 1
+        if (els.existingBsBar) {
+            if (state.active > 0) {
+                els.existingBsBar.classList.remove('hidden');
+            } else {
+                els.existingBsBar.classList.add('hidden');
+            }
+        }
 
         // lock label
         els.btnLock.textContent = activeSetup().locked ? '🔓 Unlock' : '🔒 Lock';
@@ -626,8 +697,9 @@
         const n = Number(cleaned);
         return isFinite(n) ? n : null;
     }
-    function setStatus(msg) { els.status.textContent = msg; setTimeout(() => { els.status.textContent = 'Ready'; }, 1200); }
-    function flash(msg) { setStatus(msg); }
+
+    function setStatus(msg) { toast(msg); }
+    function flash(msg) { toast(msg); }
 
     // function deltaMmText(asb, design) {
     //     if (!isNum(asb) || !isNum(design)) return '—';
@@ -644,6 +716,115 @@
         const arrow = mm > 0 ? '▲' : '▼';
         return `<span class="${cls}">${Math.abs(mm)} mm ${arrow}</span>`;
     }
+
+    function openBsPicker() {
+        const options = gatherElevStations();
+        if (!options.length) { toast('No prior stations with elevation found'); return; }
+
+        els.bsPickerList.className = 'bs-grid';
+        els.bsPickerList.innerHTML = options.map(opt => `
+            <button class="bs-btn" 
+                    data-station="${escapeHtml(opt.station)}" 
+                    data-elev="${opt.elev}">
+            <div>${escapeHtml(opt.station || '(no STA)')}</div>
+            <span class="bs-meta">Elev ${num3(opt.elev)} • Setup ${opt.setup + 1} • ${opt.source}</span>
+            </button>
+        `).join('');
+
+        els.bsPickerSheet.classList.remove('hidden');
+        els.bsPickerSheet.setAttribute('aria-hidden', 'false');
+    }
+
+
+    function closeBsPicker() {
+        els.bsPickerSheet.classList.add('hidden');
+        els.bsPickerSheet.setAttribute('aria-hidden', 'true');
+    }
+
+    function gatherElevStations() {
+        const out = [];
+        // Collect from ALL setups BEFORE the active one
+        state.setups.forEach((s, si) => {
+            if (si >= state.active) return; // prior setups only
+            s.rows.forEach((r, ri) => {
+                // BS rows: take knownElev if present
+                if (r.type === 'BS' && isNum(r.knownElev)) {
+                    out.push({
+                        setup: si,
+                        index: ri,
+                        station: r.station || '',
+                        elev: r.knownElev,
+                        source: 'BS'
+                    });
+                }
+                // FS rows: take computed elev if present
+                if (r.type === 'FS' && isNum(r.elev)) {
+                    out.push({
+                        setup: si,
+                        index: ri,
+                        station: r.station || '',
+                        elev: r.elev,
+                        source: 'FS'
+                    });
+                }
+            });
+        });
+
+        // Sort: newest setup first, then by row order
+        out.sort((a, b) => (b.setup - a.setup) || (a.index - b.index));
+        return out;
+    }
+
+    function insertBsFromPicker() {
+        const checked = document.querySelector('input[name="bsPick"]:checked');
+        if (!checked) { flash('Select a station first'); return; }
+
+        const station = checked.getAttribute('data-station') || '';
+        const elevStr = checked.getAttribute('data-elev');
+        const elev = sanitizeNumber(elevStr);
+
+        const s = activeSetup();
+        if (s.locked) { flash('Setup is locked'); return; }
+
+        // Insert a BS row at the TOP of the current setup
+        s.rows.splice(0, 0, {
+            id: uid(),
+            type: 'BS',
+            station: station,
+            knownElev: isNum(elev) ? elev : null,
+            bs: null,
+            hi: null
+        });
+
+        recompute(s);
+        render();
+        saveState();
+        closeBsPicker();
+        flash('Existing BS added');
+    }
+
+    function insertBsFromData(station, elev) {
+        const s = activeSetup();
+        if (s.locked) return toast('Setup is locked');
+
+        // Insert BS at the top of the active setup
+        s.rows.splice(0, 0, {
+            id: uid(),
+            type: 'BS',
+            station: station || '',
+            knownElev: isNum(elev) ? elev : null,
+            bs: null,
+            hi: null
+        });
+
+        recompute(s);
+        render();
+        saveState();
+        closeBsPicker();
+        toast('Existing BS added');
+    }
+
+
 
 
 })();
