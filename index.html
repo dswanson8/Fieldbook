@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Field Book</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="style.min.css">
 </head>
 
 <body>
@@ -97,6 +97,23 @@
           <button id="scClear" class="ghost">Clear</button>
         </div>
       </div>
+
+      <!-- Slope Calculator (solve 1 unknown) -->
+      <div class="tool-card" style="margin-top:12px">
+        <div class="tool-title">Slope Calculator (solve 1 unknown)</div>
+        <div class="tool-grid">
+          <input id="slcStart" placeholder="Bottom Elev (m)" inputmode="decimal">
+          <input id="slcEnd" placeholder="Top Elev (m)" inputmode="decimal">
+          <input id="slcSlope" placeholder="Slope (%)" inputmode="decimal">
+          <input id="slcLen" placeholder="Length (m)" inputmode="decimal">
+        </div>
+        <div id="slcResults" class="tool-results"></div>
+        <div class="tool-actions">
+          <button id="slcCompute" class="primary">Compute</button>
+          <button id="slcClear" class="ghost">Clear</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -109,13 +126,13 @@
         <button id="bsPickerClose" class="ghost">✕</button>
       </div>
 
-      <div id="bsPickerList" style=""></div>
+      <div id="bsPickerList"></div>
 
     </div>
   </div>
 
 
-  <script src="app.js?v=2025-11-04"></script>
+  <script src="app.minify.js?v=2025-11-06"></script>
 </body>
 
 </html>
