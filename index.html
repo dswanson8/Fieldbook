@@ -67,6 +67,7 @@
           <button id="exportAllBtn">Export All (PDF/Print)</button>
           <button id="resetBtn" class="ghost">Reset</button>
           <button id="toolsBtn" class="ghost wide">Slope</button>
+          <button id="gradeSpotsBtn" class="ghost">Grades</button>
         </div>
       </div>
     </div>
@@ -125,14 +126,52 @@
         <div id="bsPickerTitle">Add Existing BS</div>
         <button id="bsPickerClose" class="ghost">✕</button>
       </div>
-
       <div id="bsPickerList"></div>
-
     </div>
   </div>
 
+  <!-- Grade Spot Check Sheet -->
+  <div id="gradeSpotsSheet" class="sheet hidden" aria-hidden="true">
+    <div class="sheet-backdrop" id="gradeSpotsBackdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-labelledby="gradeSpotsTitle">
+      <div class="sheet-header">
+        <button id="gradeSpotsClose" class="ghost">✕</button>
+      </div>
 
-  <script src="app.minify.js?v=2025-11-06"></script>
+      <!-- Universal subtract input -->
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+        <input id="invDrop" placeholder="Top→Invert subtract (m)" inputmode="decimal" style="flex:1 1 100%">
+        <button id="addGradeRowBtn" class="primary">+ Row</button>
+        <button id="clearGradeRowsBtn" class="ghost">Clear</button>
+      </div>
+
+      <!-- Table -->
+      <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed">
+        <thead>
+          <tr>
+            <th style="width:28%">STA</th>
+            <th style="width:24%">Design Inv</th>
+            <th style="width:24%">ASB Top</th>
+            <th style="width:24%">Δ (ASB Inv − Design)</th>
+          </tr>
+        </thead>
+        <tbody id="gradeSpotsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ASB Elevation Picker (grid) -->
+  <div id="asbPickerSheet" class="sheet hidden" aria-hidden="true">
+    <div class="sheet-backdrop" id="asbPickerBackdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-labelledby="asbPickerTitle">
+      <div class="sheet-header">
+        <button id="asbPickerClose" class="ghost">✕</button>
+      </div>
+      <div id="asbPickerList" class="bs-grid"></div>
+    </div>
+  </div>
+
+  <script src="app.min.js?v=2025-11-06-V3"></script>
 </body>
 
 </html>
