@@ -6,6 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Field Book</title>
   <link rel="stylesheet" type="text/css" href="style.min.css">
+  <style>
+    body,
+    input,
+    button {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+      font-feature-settings: "tnum" !important;
+      /* enable tabular numbers */
+    }
+  </style>
 </head>
 
 <body>
@@ -67,7 +76,7 @@
           <button id="exportAllBtn">Export All (PDF/Print)</button>
           <button id="resetBtn" class="ghost">Reset</button>
           <button id="toolsBtn" class="ghost wide">Slope</button>
-          <button id="gradeSpotsBtn" class="ghost">Grades</button>
+          <button id="gradeSpotsBtn" class="ghost">Grade Sheet</button>
         </div>
       </div>
     </div>
@@ -171,7 +180,7 @@
     </div>
   </div>
 
-  <script src="app.min.js?v=2025-11-06-V3"></script>
+  <script src="app.min.js?v=2025-11-06-V4"></script>
 </body>
 
 </html>
