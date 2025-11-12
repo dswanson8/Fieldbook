@@ -155,7 +155,14 @@
 
       <!-- Universal subtract input -->
       <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
-        <input id="invDrop" placeholder="Top→Invert subtract (m)" inputmode="decimal" style="flex:1 1 100%">
+        <div style="flex:1 1 100%" class="pipe-thick">
+          <label for="invDrop">ROD Thickness</label>
+          <input id="invDrop" placeholder="Top→Invert subtract (m)" inputmode="decimal">
+        </div>
+        <div style="flex:1 1 100%" class="pipe-thick">
+          <label for="gpsDrop">GPS Thickness</label>
+          <input id="gpsDrop" placeholder="GPS Top→Invert subtract (m)" inputmode="decimal">
+        </div>
         <button id="addGradeRowBtn" class="primary">+ Row</button>
         <button id="clearGradeRowsBtn" class="ghost">Clear</button>
       </div>
@@ -164,10 +171,11 @@
       <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed">
         <thead>
           <tr>
-            <th style="width:28%">STA</th>
-            <th style="width:24%">Design Inv</th>
-            <th style="width:24%">ASB Top</th>
-            <th style="width:24%">Δ (ASB Inv − Design)</th>
+            <th style="width:24%">STA</th>
+            <th style="width:19%">Design Inv</th>
+            <th style="width:19%">ASB Top</th>
+            <th style="width:19%">Δ (ASB Inv − Design)</th>
+            <th style="width:19%">GPS Inv − Design</th>
           </tr>
         </thead>
         <tbody id="gradeSpotsBody"></tbody>
