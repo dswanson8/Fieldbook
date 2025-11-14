@@ -102,12 +102,35 @@
         <div class="tool-grid">
           <input id="scStartSta" placeholder="Start Station (opt.)" inputmode="text">
           <input id="scEndSta" placeholder="End Station (opt.)" inputmode="text">
-          <input id="scDStart" placeholder="Design Elev @ Start" inputmode="decimal">
-          <input id="scDEnd" placeholder="Design Elev @ End" inputmode="decimal">
-          <input id="scAStart" placeholder="ASB Elev @ Start" inputmode="decimal">
-          <input id="scAEnd" placeholder="ASB Elev @ End" inputmode="decimal">
+
+          <!-- Design @ Start + Pick -->
+          <div class="sc-field">
+            <input id="scDStart" placeholder="Design Elev @ Start" inputmode="decimal">
+            <button type="button" id="scDStartPick" class="sc-pick-btn">Pick</button>
+          </div>
+
+          <!-- Design @ End + Pick -->
+          <div class="sc-field">
+            <input id="scDEnd" placeholder="Design Elev @ End" inputmode="decimal">
+            <button type="button" id="scDEndPick" class="sc-pick-btn">Pick</button>
+          </div>
+
+          <!-- ASB @ Start + Pick -->
+          <div class="sc-field">
+            <input id="scAStart" placeholder="ASB Elev @ Start" inputmode="decimal">
+            <button type="button" id="scAStartPick" class="sc-pick-btn">Pick</button>
+          </div>
+
+          <!-- ASB @ End + Pick -->
+          <div class="sc-field">
+            <input id="scAEnd" placeholder="ASB Elev @ End" inputmode="decimal">
+            <button type="button" id="scAEndPick" class="sc-pick-btn">Pick</button>
+          </div>
+
           <input id="scLen" placeholder="Segment Length (m)" inputmode="decimal">
         </div>
+
+
         <div id="scResults" class="tool-results"></div>
         <div class="tool-actions">
           <button id="scCompute" class="primary">Compute</button>
@@ -181,6 +204,18 @@
         </thead>
         <tbody id="gradeSpotsBody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Slope Checker Picker (from Grade Sheet) -->
+  <div id="scPickerSheet" class="sheet hidden" aria-hidden="true">
+    <div class="sheet-backdrop" id="scPickerBackdrop"></div>
+    <div class="sheet-panel" role="dialog" aria-labelledby="scPickerTitle">
+      <div class="sheet-header">
+        <div id="scPickerTitle" class="sheet-title">Pick Elevation</div>
+        <button id="scPickerClose" class="ghost">✕</button>
+      </div>
+      <div id="scPickerList" class="bs-grid"></div>
     </div>
   </div>
 
