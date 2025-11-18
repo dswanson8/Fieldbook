@@ -174,21 +174,25 @@
     <div class="sheet-backdrop" id="gradeSpotsBackdrop"></div>
     <div class="sheet-panel" role="dialog" aria-labelledby="gradeSpotsTitle">
       <div class="sheet-header">
+        <button id="addGradeRowBtn" class="primary" style="flex:1 1 50%">+ Row</button>
+        <button id="clearGradeRowsBtn" class="ghost" style="flex:1 1 50%">Clear</button>
         <button id="gradeSpotsClose" class="ghost">✕</button>
       </div>
 
       <!-- Universal subtract input -->
       <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
         <div style="flex:1 1 100%" class="pipe-thick">
-          <label for="invDrop">ROD Thickness</label>
-          <input id="invDrop" placeholder="Top→Invert subtract (m)" inputmode="decimal">
+          <label for="stormDrop">Storm Top→Inv (m)</label>
+          <input id="stormDrop" placeholder="Storm Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
+        </div>
+        <div style="flex:1 1 100%" class="pipe-thick">
+          <label for="sanDrop">San Top→Inv (m)</label>
+          <input id="sanDrop" placeholder="San Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
         </div>
         <div style="flex:1 1 100%" class="pipe-thick">
           <label for="gpsDrop">GPS Thickness</label>
           <input id="gpsDrop" placeholder="GPS Top→Invert subtract (m)" inputmode="decimal">
         </div>
-        <button id="addGradeRowBtn" class="primary">+ Row</button>
-        <button id="clearGradeRowsBtn" class="ghost">Clear</button>
       </div>
 
       <!-- Table -->
