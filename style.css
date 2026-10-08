@@ -1,3 +1,9 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v8.4.14,
+* Autoprefixer: v10.4.7
+* Browsers: last 4 version
+*/
 :root {
     --bg: #ffffff;
     --card: #f9fafb;
@@ -13,6 +19,7 @@
 }
 
 * {
+    -webkit-box-sizing: border-box;
     box-sizing: border-box
 }
 
@@ -27,7 +34,11 @@ body {
     color: var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;   /* iOS: stop text auto-enlarging in landscape */
+    text-size-adjust: 100%;
     padding: 5px;
+    padding-left: calc(5px + env(safe-area-inset-left));
+    padding-right: calc(5px + env(safe-area-inset-right));
 }
 
 .wrap {
@@ -40,24 +51,51 @@ header {
     top: 0;
     z-index: 30;
     background: rgba(255, 255, 255, .96);
+    -webkit-backdrop-filter: saturate(180%) blur(6px);
     backdrop-filter: saturate(180%) blur(6px);
 }
 
 .head {
+    display: -ms-grid;
     display: grid;
+    -ms-grid-columns: 1fr;
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 8px 0
 }
 
 .meta {
+    display: -ms-grid;
     display: grid;
+    -ms-grid-columns: 1fr;
     grid-template-columns: 1fr;
     gap: 8px
 }
 
 .meta input {
     width: 100%
+}
+
+/* Title + date share one row (saves a full row under the sticky header) */
+.head .meta {
+    grid-template-columns: 2fr 1fr;
+}
+.head .meta input {
+    height: 40px;
+    padding: 0 10px;
+    font-size: 14px;
+}
+
+.text-blue {
+    color: blue;
+}
+
+.text-orange {
+    color: orange;
+}
+
+.bold {
+    font-weight: 600;
 }
 
 .card {
@@ -90,40 +128,58 @@ header {
     font-weight: 600;
 }
 
-/* Touch toolbar */
-.toolbar {}
 
+.toolbar {
+    display: grid;   /* was missing, so the span rules below never applied */
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+}
+.toolbar button,
+.toolbar .seg label {
+    margin: 0;
+}
 .toolbar .seg {
+    -ms-grid-column-span: 2;
     grid-column: span 2;
 }
 
 .toolbar .wide {
+    -ms-grid-column-span: 2;
     grid-column: span 2;
 }
 
 @media (min-width:560px) {
     .toolbar {
+        -ms-grid-columns: (1fr)[4];
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
 .addBtn {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     gap: 10px;
 }
 
 button,
 .seg label {
+    -webkit-appearance: none;
+    -moz-appearance: none;
     appearance: none;
     border: 1px solid var(--border);
     background: #ffffff;
     color: var(--text);
-    padding: 12px;
+    padding: 10px;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: .2px;
     cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     display: block;
     width: 100%;
@@ -142,6 +198,8 @@ button.ghost {
 }
 
 .seg {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     overflow: hidden;
     gap: 10px;
@@ -164,6 +222,7 @@ button.ghost {
 }
 
 .chips {
+    display: -ms-grid;
     display: grid;
     gap: 8px;
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -180,6 +239,24 @@ button.ghost {
     background: #fff;
 }
 
+#scSetsBar {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+#scSetsBar .chip {
+    margin: 0px;
+    width: 19%;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 10px;
+}
+
 #addExistingBsBtn {
     margin: 0;
     background-color: skyblue;
@@ -191,14 +268,16 @@ button.ghost {
 }
 
 .bs-grid {
+    display: -ms-grid;
     display: grid;
+    -ms-grid-columns: (1fr)[3];
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px
 }
 
-@media (max-width:420px) {
+@media (max-width:545px) {
     .bs-grid {
-        grid-template-columns: repeat(2, 1fr)
+        -ms-grid-columns: (1fr)[1];
+        grid-template-columns: repeat(1, 1fr)
     }
 }
 
@@ -215,12 +294,14 @@ button.ghost {
     display: block;
     color: #6b7280;
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 4px
 }
 
 
 .chip button {
+    width: -webkit-min-content;
+    width: -moz-min-content;
     width: min-content;
 }
 
@@ -243,7 +324,7 @@ colgroup col.small {
 /* five equal small columns */
 thead th {
     position: sticky;
-    top: 92px;
+    top: 56px;   /* = header height (8px + 40px input + 8px). Change both together. */
     z-index: 20;
     background: #fff;
     color: var(--muted);
@@ -264,19 +345,21 @@ tbody td {
 .cell-edit {
     background: #fff;
     border: 1px solid var(--border);
-    min-height: 44px
+    /* min-height: 30px; */
 }
 
 .cell-edit:focus-within {
     outline: 0;
     border-color: #60a5fa;
+    -webkit-box-shadow: 0 0 0 3px rgba(59, 130, 246, .25);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, .25)
 }
 
 .cell-calc {
-    background: var(--calc);
+    /* background: var(--calc); */
     color: #111827;
-    border: 1px solid var(--calc-border);
+    /* border: 1px solid var(--calc-border); */
+    border: 1px solid black;
     text-align: center;
 }
 
@@ -285,15 +368,54 @@ tbody td {
     background: transparent;
     border: 0;
     color: var(--text);
-    font: 600 18px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font: 600 12px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     outline: none;
     padding: 10px 2px;
-    font-size: 14px;
+    font-size: 12px;
     text-align: center;
+}
+
+.cell-input--manual {
+    border: 1px solid black;
+    display: block;
+    width: 65%;
+    margin: 5px auto;
+    padding: 2px;
+    border-radius: 0;
+    text-align: center;
+}
+
+.cell-input::-webkit-input-placeholder {
+    color: #9ca3af
+}
+
+.cell-input::-moz-placeholder {
+    color: #9ca3af
+}
+
+.cell-input:-ms-input-placeholder {
+    color: #9ca3af
+}
+
+.cell-input::-ms-input-placeholder {
+    color: #9ca3af
 }
 
 .cell-input::placeholder {
     color: #9ca3af
+}
+
+.pipe-thick {
+    position: relative;
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-rows: 30% 70%;
+    grid-template-rows: 30% 70%;
+}
+
+.pipe-thick label {
+    font-size: 10px;
+    font-weight: bold;
 }
 
 .qa-green {
@@ -320,24 +442,69 @@ tbody td {
 
 .footerbar .card {
     display: block;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));  /* clear iPhone home bar */
+}
+.footerbar .addBtn {
+    gap: 6px;
+}
+.footerbar button {
+    margin: 6px 0 0;
+    padding: 8px 4px;
+    font-size: 13px;
 }
 
 input,
 select {
+    -webkit-appearance: none;   /* iOS: remove inner shadow + forced rounding */
+    appearance: none;
+    font-size: inherit;
     background: #fff;
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 12px;
     width: 100%;
+    text-transform: uppercase;
+}
+
+input::-webkit-input-placeholder {
+    color: #9ca3af
+}
+
+input::-moz-placeholder {
+    color: #9ca3af
+}
+
+input:-ms-input-placeholder {
+    color: #9ca3af
+}
+
+input::-ms-input-placeholder {
+    color: #9ca3af
 }
 
 input::placeholder {
     color: #9ca3af
 }
 
+/* iOS date input: keeps its height when empty, left-aligned like the title box */
+input[type="date"] {
+    min-height: 40px;
+    text-align: left;
+}
+input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+}
+/* radios stay hidden even with appearance:none above */
+.seg input {
+    display: none !important;
+}
+
 #summary {
     font-size: 12px;
+    max-height: 3.6em;          /* ~3 setups visible, scroll for more */
+    overflow-y: auto;
 }
 
 #summary b {
@@ -384,18 +551,32 @@ input::placeholder {
     background: #fff;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
+    -webkit-box-shadow: 0 -8px 24px rgba(0, 0, 0, .2);
     box-shadow: 0 -8px 24px rgba(0, 0, 0, .2);
     padding: 12px;
-    max-height: 75vh;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    min-height: 75vh;
+    max-height: 90vh;
+    min-height: 75dvh;   /* iOS Safari: vh ignores the toolbar, dvh doesn't */
+    max-height: 90dvh;
     overflow: auto;
+    overscroll-behavior: contain;   /* stop page scrolling behind the sheet */
+    -webkit-overflow-scrolling: touch;
 }
 
 .sheet-header {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
     font-weight: 700;
+    gap: 5px;
 }
 
 .tool-card {
@@ -411,21 +592,60 @@ input::placeholder {
 }
 
 .tool-grid {
+    display: -ms-grid;
     display: grid;
+    -ms-grid-columns: 1fr 8px 1fr;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
 
 @media (min-width:560px) {
     .tool-grid {
-        grid-template-columns: repeat(3, 1fr);
+        -ms-grid-columns: (1fr)[2];
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-#toolsClose {
+.sc-field {
+    display: -ms-grid;
+    display: grid;
+    gap: 4px;
+    -ms-grid-columns: 2fr 4px 1fr;
+    grid-template-columns: 2fr 1fr;
+}
+
+.sc-field input {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sc-pick-btn {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    font-size: 11px;
+    margin: 0;
+    white-space: nowrap;
+    background-color: khaki;
+}
+
+#scPickerClose {
+    width: auto;
+    margin-left: auto;
+}
+
+
+#toolsClose,
+#gradeSpotsClose,
+#asbPickerClose {
     display: block;
     width: auto;
     margin-left: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .tool-results {
@@ -439,7 +659,125 @@ input::placeholder {
 }
 
 .tool-actions {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     gap: 8px;
     margin-top: 8px;
+}
+
+.mini-hint {
+    font-size: 12px;
+    text-align: center;
+}
+
+.mini-hint b {
+    font-size: 13px;
+    background-color: yellow;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+/* Grade Sheet: per-row meta controls (STM/SAN + TOP/INV) */
+.grade-row-meta td {
+    padding: 6px 8px;
+    background: #f7f7f7;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.grade-meta-bar {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    /* justify-content: space-between;
+    align-items: center; */
+    gap: 8px;
+    font-size: 11px;
+}
+
+.grade-toggle-group {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.grade-toggle-label {
+    opacity: 0.7;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.grade-chip {
+    padding: 2px 4px;
+    border-radius: 999px;
+    border: 1px solid #d0d0d0;
+    background: #ffffff;
+    font-size: 10px;
+    line-height: 1.3;
+    cursor: default;
+    /* logic later */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.grade-toggle-group:first-of-type span:nth-of-type(2) {
+    background-color: #5cb57d75;
+}
+
+.grade-toggle-group:first-of-type span:nth-of-type(3) {
+    background-color: #7a09254d;
+}
+
+.grade-chip--active {
+    /* background: #dbeafe !important; */
+    /* soft blue */
+    border-color: #60a5fa;
+    border-width: 2px;
+    font-weight: bold;
+}
+
+.grade-toggle-group .grade-chip {
+    padding: 4px 10px;
+    border-color: rgb(0, 0, 0);
+}
+
+.grade-toggle-group .grade-chip.grade-chip--active {
+    background-color: transparent;
+    border-color: cornflowerblue;
+    BORDER-WIDTH: medium;
+
+}
+
+
+/* Compact delta badges for HIGH/LOW */
+.delta-badge {
+    display: inline-block;
+    font-size: 11px;
+    border-radius: 2px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.delta-badge.green {
+    background: rgba(22, 163, 74, .10);
+    color: #166534;
+}
+
+/* HIGH */
+.delta-badge.red {
+    background: rgba(220, 38, 38, .12);
+    color: #991b1b;
+}
+
+/* LOW  */
+.delta-badge.neutral {
+    background: #eef2f7;
+    color: #374151;
+    font-weight: 600;
 }

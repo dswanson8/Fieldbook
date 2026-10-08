@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#ffffff">
   <title>Field Book</title>
-  <link rel="stylesheet" type="text/css" href="style.min.css">
+  <link rel="stylesheet" type="text/css" href="style.min.css?v=2026-10-08">
   <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
   <style>
     body,
@@ -17,34 +17,39 @@
     }
   </style>
 </head>
-
 <body>
   <header>
     <div class="wrap head">
       <div class="meta">
-        <input id="jobTitle" placeholder="Job Title"> <input id="jobDate" type="date">
+        <input id="jobTitle" placeholder="Job Title" autocomplete="off">
+        <input id="jobDate" type="date">
       </div>
     </div>
   </header>
+
   <main class="wrap" id="app">
     <div class="card">
       <div class="toolbar">
-        <button id="newSetupBtn" class="primary">+ New Setup</button>
+        <button type="button" id="newSetupBtn" class="primary">+ New Setup</button>
         <div class="addBtn">
-          <button id="addBsBtn">+ Add BS</button>
-          <button id="addFsBtn">+ Add FS</button>
+          <button type="button" id="addBsBtn">+ Add BS</button>
+          <button type="button" id="addFsBtn">+ Add FS</button>
         </div>
         <div class="seg wide" title="HI aggregator">
-          <input type="radio" name="agg" id="aggMedian" checked> <label for="aggMedian">Median HI</label> <input
-            type="radio" name="agg" id="aggMean"> <label for="aggMean">Mean HI</label>
-        </div><button id="lockToggle" class="ghost wide" title="Lock/unlock current setup">🔒 Lock</button>
+          <input type="radio" name="agg" id="aggMedian" checked> <label for="aggMedian">Median HI</label>
+          <input type="radio" name="agg" id="aggMean"> <label for="aggMean">Mean HI</label>
+        </div>
+        <button type="button" id="lockToggle" class="ghost wide" title="Lock/unlock current setup">🔒 Lock</button>
       </div>
     </div>
+
     <div class="chips" id="setupTabs"></div>
+
     <!-- Shows only when active setup > 0 -->
     <div id="existingBsBar" class="hidden" style="margin-bottom:10px;">
-      <button id="addExistingBsBtn" class="chip">+ Add Existing BS</button>
+      <button type="button" id="addExistingBsBtn" class="chip">+ Add Existing BS</button>
     </div>
+
     <div class="card">
       <table id="grid">
         <colgroup>
@@ -68,16 +73,15 @@
         <tbody id="gridBody"></tbody>
       </table>
     </div>
+
     <div class="footerbar">
       <div class="card">
-        <div id="summary">
-          Setups: 0 • BS: 0 • FS: 0 • G/Y/R: 0/0/0
-        </div>
+        <div id="summary"></div>
         <div class="addBtn">
-          <button id="exportAllBtn">Export All (PDF/Print)</button>
-          <button id="resetBtn" class="ghost">Reset</button>
-          <button id="toolsBtn" class="ghost wide">Slope</button>
-          <button id="gradeSpotsBtn" class="ghost">Grade Sheet</button>
+          <button type="button" id="exportAllBtn">Export All (PDF/Print)</button>
+          <button type="button" id="resetBtn" class="ghost">Reset</button>
+          <button type="button" id="toolsBtn" class="ghost wide">Slope</button>
+          <button type="button" id="gradeSpotsBtn" class="ghost">Grade Sheet</button>
         </div>
       </div>
     </div>
@@ -86,55 +90,44 @@
   <!-- Tools Flyout (bottom sheet) -->
   <div id="toolsSheet" class="sheet hidden" aria-hidden="true">
     <div class="sheet-backdrop" id="toolsBackdrop"></div>
-    <div class="sheet-panel" role="dialog" aria-labelledby="toolsTitle">
+    <div class="sheet-panel" role="dialog" aria-label="Slope tools">
       <div class="sheet-header">
-        <button id="toolsClose" class="ghost">✕</button>
+        <button type="button" id="toolsClose" class="ghost" aria-label="Close">✕</button>
       </div>
 
       <div class="tool-card">
         <div class="tool-title">Slope Checker</div>
-
-        <!-- Slope Checker setups -->
-        <div id="scSetsBar" class="chips">
-          <!-- Populated by JS: [Setup 1] [+ Add Setup] -->
-        </div>
+        <!-- Slope Checker setups: populated by JS -->
+        <div id="scSetsBar" class="chips"></div>
 
         <div class="tool-grid">
-          <input id="scStartSta" placeholder="Start Station (opt.)" inputmode="text">
-          <input id="scEndSta" placeholder="End Station (opt.)" inputmode="text">
+          <input id="scStartSta" placeholder="Start Station (opt.)" inputmode="text" autocomplete="off">
+          <input id="scEndSta" placeholder="End Station (opt.)" inputmode="text" autocomplete="off">
 
-          <!-- Design @ Start + Pick -->
           <div class="sc-field">
-            <input id="scDStart" placeholder="Design Elev @ Start" inputmode="decimal">
+            <input id="scDStart" placeholder="Design Elev @ Start" inputmode="decimal" autocomplete="off">
             <button type="button" id="scDStartPick" class="sc-pick-btn">Pick</button>
           </div>
-
-          <!-- Design @ End + Pick -->
           <div class="sc-field">
-            <input id="scDEnd" placeholder="Design Elev @ End" inputmode="decimal">
+            <input id="scDEnd" placeholder="Design Elev @ End" inputmode="decimal" autocomplete="off">
             <button type="button" id="scDEndPick" class="sc-pick-btn">Pick</button>
           </div>
-
-          <!-- ASB @ Start + Pick -->
           <div class="sc-field">
-            <input id="scAStart" placeholder="ASB Elev @ Start" inputmode="decimal">
+            <input id="scAStart" placeholder="ASB Elev @ Start" inputmode="decimal" autocomplete="off">
             <button type="button" id="scAStartPick" class="sc-pick-btn">Pick</button>
           </div>
-
-          <!-- ASB @ End + Pick -->
           <div class="sc-field">
-            <input id="scAEnd" placeholder="ASB Elev @ End" inputmode="decimal">
+            <input id="scAEnd" placeholder="ASB Elev @ End" inputmode="decimal" autocomplete="off">
             <button type="button" id="scAEndPick" class="sc-pick-btn">Pick</button>
           </div>
 
-          <input id="scLen" placeholder="Segment Length (m)" inputmode="decimal">
+          <input id="scLen" placeholder="Segment Length (m)" inputmode="decimal" autocomplete="off">
         </div>
-
 
         <div id="scResults" class="tool-results"></div>
         <div class="tool-actions">
-          <button id="scCompute" class="primary">Compute</button>
-          <button id="scClear" class="ghost">Clear</button>
+          <button type="button" id="scCompute" class="primary">Compute</button>
+          <button type="button" id="scClear" class="ghost">Clear</button>
         </div>
       </div>
 
@@ -142,18 +135,17 @@
       <div class="tool-card" style="margin-top:12px">
         <div class="tool-title">Slope Calculator (solve 1 unknown)</div>
         <div class="tool-grid">
-          <input id="slcStart" placeholder="Bottom Elev (m)" inputmode="decimal">
-          <input id="slcEnd" placeholder="Top Elev (m)" inputmode="decimal">
-          <input id="slcSlope" placeholder="Slope (%)" inputmode="decimal">
-          <input id="slcLen" placeholder="Length (m)" inputmode="decimal">
+          <input id="slcStart" placeholder="Bottom Elev (m)" inputmode="decimal" autocomplete="off">
+          <input id="slcEnd" placeholder="Top Elev (m)" inputmode="decimal" autocomplete="off">
+          <input id="slcSlope" placeholder="Slope (%)" inputmode="decimal" autocomplete="off">
+          <input id="slcLen" placeholder="Length (m)" inputmode="decimal" autocomplete="off">
         </div>
         <div id="slcResults" class="tool-results"></div>
         <div class="tool-actions">
-          <button id="slcCompute" class="primary">Compute</button>
-          <button id="slcClear" class="ghost">Clear</button>
+          <button type="button" id="slcCompute" class="primary">Compute</button>
+          <button type="button" id="slcClear" class="ghost">Clear</button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -162,44 +154,43 @@
     <div class="sheet-backdrop" id="bsPickerBackdrop"></div>
     <div class="sheet-panel" role="dialog" aria-labelledby="bsPickerTitle">
       <div class="sheet-header">
-        <div id="bsPickerTitle">Add Existing BS</div>
-        <button id="bsPickerClose" class="ghost">✕</button>
+        <div id="bsPickerTitle" class="sheet-title">Add Existing BS</div>
+        <button type="button" id="bsPickerClose" class="ghost" aria-label="Close">✕</button>
       </div>
-      <div id="bsPickerList"></div>
+      <div id="bsPickerList" class="bs-grid"></div>
     </div>
   </div>
 
   <!-- Grade Spot Check Sheet -->
   <div id="gradeSpotsSheet" class="sheet hidden" aria-hidden="true">
     <div class="sheet-backdrop" id="gradeSpotsBackdrop"></div>
-    <div class="sheet-panel" role="dialog" aria-labelledby="gradeSpotsTitle">
+    <div class="sheet-panel" role="dialog" aria-label="Grade sheet">
       <div class="sheet-header">
-        <button id="addGradeRowBtn" class="primary" style="flex:1 1 50%">+ Row</button>
-        <button id="clearGradeRowsBtn" class="ghost" style="flex:1 1 50%">Clear</button>
-        <button id="gradeSpotsClose" class="ghost">✕</button>
+        <button type="button" id="addGradeRowBtn" class="primary" style="flex:1 1 50%">+ Row</button>
+        <button type="button" id="clearGradeRowsBtn" class="ghost" style="flex:1 1 50%">Clear</button>
+        <button type="button" id="gradeSpotsClose" class="ghost" aria-label="Close">✕</button>
       </div>
 
-      <!-- Universal subtract input -->
+      <!-- Top→Invert drops (meters, e.g. 0.250) -->
       <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
         <div style="flex:1 1 100%" class="pipe-thick">
-          <label for="stormDrop">STM Top→Inv</label>
-          <input id="stormDrop" placeholder="Storm Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
+          <label for="stormDrop">STM Top→Inv (m)</label>
+          <input id="stormDrop" placeholder="e.g. 0.250" inputmode="decimal" autocomplete="off">
         </div>
         <div style="flex:1 1 100%" class="pipe-thick">
-          <label for="sanDrop">SAN Top→Inv</label>
-          <input id="sanDrop" placeholder="San Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
+          <label for="sanDrop">SAN Top→Inv (m)</label>
+          <input id="sanDrop" placeholder="e.g. 0.250" inputmode="decimal" autocomplete="off">
         </div>
         <div style="flex:1 1 100%" class="pipe-thick">
-          <label for="stormGpsDrop">GPS STM Top→Inv</label>
-          <input id="stormGpsDrop" placeholder="Storm Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
+          <label for="stormGpsDrop">GPS STM Top→Inv (m)</label>
+          <input id="stormGpsDrop" placeholder="e.g. 0.250" inputmode="decimal" autocomplete="off">
         </div>
         <div style="flex:1 1 100%" class="pipe-thick">
-          <label for="sanGpsDrop">GPS SAN Top→Inv</label>
-          <input id="sanGpsDrop" placeholder="San Top→Inv (m)" inputmode="decimal" style="flex:1 1 50%">
+          <label for="sanGpsDrop">GPS SAN Top→Inv (m)</label>
+          <input id="sanGpsDrop" placeholder="e.g. 0.250" inputmode="decimal" autocomplete="off">
         </div>
       </div>
 
-      <!-- Table -->
       <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed">
         <thead>
           <tr>
@@ -221,7 +212,7 @@
     <div class="sheet-panel" role="dialog" aria-labelledby="scPickerTitle">
       <div class="sheet-header">
         <div id="scPickerTitle" class="sheet-title">Pick Elevation</div>
-        <button id="scPickerClose" class="ghost">✕</button>
+        <button type="button" id="scPickerClose" class="ghost" aria-label="Close">✕</button>
       </div>
       <div id="scPickerList" class="bs-grid"></div>
     </div>
@@ -232,14 +223,14 @@
     <div class="sheet-backdrop" id="asbPickerBackdrop"></div>
     <div class="sheet-panel" role="dialog" aria-labelledby="asbPickerTitle">
       <div class="sheet-header">
-        <button id="asbPickerClose" class="ghost">✕</button>
+        <div id="asbPickerTitle" class="sheet-title">Pick ASB Elevation</div>
+        <button type="button" id="asbPickerClose" class="ghost" aria-label="Close">✕</button>
       </div>
       <div id="asbPickerList" class="bs-grid"></div>
     </div>
   </div>
 
-  <script src="app.min.js?v=2025-11-25"></script>
-  <!-- <script src="app.js?v=2025-11-25"></script> -->
+  <!-- Bump ?v= whenever app.js changes so phones don't load a cached copy -->
+  <script src="app.min.js?v=2026-10-08"></script>
 </body>
-
 </html>
